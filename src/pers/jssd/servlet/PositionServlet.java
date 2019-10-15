@@ -4,6 +4,7 @@ import pers.jssd.entity.Dept;
 import pers.jssd.entity.Position;
 import pers.jssd.service.PositionService;
 import pers.jssd.service.impl.PositionServiceImpl;
+import pers.jssd.util.PageBean;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -20,8 +21,19 @@ public class PositionServlet extends BaseServlet {
 
     // 查询所有职业
     public void findPositions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        List<Position> positions = positionService.findPositions();
-        req.setAttribute("positions", positions);
+        PageBean<Position> pageBean = new PageBean<>();
+        String sIndex = req.getParameter("index");
+        int index = 1;
+        try {
+            index = Integer.parseInt(sIndex);
+        } catch (NumberFormatException e) {
+            //e.printStackTrace();
+        }
+
+        pageBean.setIndex(index);
+
+        positionService.findPositions(pageBean);
+        req.setAttribute("pageBean", pageBean);
         req.getRequestDispatcher("/system/positionList.jsp").forward(req, resp);
     }
 

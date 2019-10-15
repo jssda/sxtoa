@@ -46,7 +46,6 @@
         function changePage(index) {
             window.location = "servlet/deptServlet?method=findDepts&index=" + index;
         }
-
     </script>
 </head>
 

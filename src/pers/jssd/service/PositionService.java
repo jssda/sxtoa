@@ -1,6 +1,8 @@
 package pers.jssd.service;
 
+import pers.jssd.entity.Dept;
 import pers.jssd.entity.Position;
+import pers.jssd.util.PageBean;
 
 import java.util.List;
 
@@ -47,4 +49,11 @@ public interface PositionService {
      * @return 返回更新的条数
      */
     int updatePosition(Position position);
+
+    /**
+     * 分页查找所有的岗位信息
+     *
+     * @param pageBean 分页信息
+     */
+    void findPositions(PageBean<Position> pageBean);
 }

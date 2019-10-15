@@ -4,6 +4,7 @@ import pers.jssd.dao.PositionDao;
 import pers.jssd.dao.impl.PositionDaoImpl;
 import pers.jssd.entity.Position;
 import pers.jssd.service.PositionService;
+import pers.jssd.util.PageBean;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public class PositionServiceImpl implements PositionService {
 
     @Override
     public List<Position> findPositions() {
-        return positionDao.getPositions();
+        return positionDao.listPositions();
     }
 
     @Override
@@ -37,5 +38,19 @@ public class PositionServiceImpl implements PositionService {
     @Override
     public int updatePosition(Position position) {
         return positionDao.updatePosition(position);
+    }
+
+    @Override
+    public void findPositions(PageBean<Position> pageBean) {
+        // 设置每页显示的数据量
+        pageBean.setSize(13);
+        // 设置默认的显示页码数组长度
+        pageBean.setDefaultNumberLength(5);
+
+        int sum = positionDao.getPositionSum();
+        // 设置总页数, 设置总页数的同时, 会自动计算出一共有多少页,
+        pageBean.setTotalCount(sum);
+
+        positionDao.listPositions(pageBean);
     }
 }
