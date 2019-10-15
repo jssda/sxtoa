@@ -69,7 +69,7 @@
         </tr>
         </thead>
         <tbody>
-        <c:forEach items="${auditingList}" var="audit">
+        <c:forEach items="${pageBean.list}" var="audit">
             <tr>
                 <td>${audit.expense.employee.realName}</td>
                 <td>${audit.expense.totalAmount}</td>
@@ -92,6 +92,36 @@
         </c:forEach>
         </tbody>
     </table>
+
+    <div class="pagin">
+        <div class="message">共&nbsp;<i class="blue">${pageBean.totalCount}</i>&nbsp;条记录，
+            共&nbsp;<i class="blue">${pageBean.totalPageCount}</i>&nbsp;页, 当前显示第&nbsp;<i class="blue">${pageBean.index}&nbsp;</i>页
+        </div>
+        <ul class="paginList">
+            <c:if test="${pageBean.index == 1}">
+                <li class="paginItem current"><a href="javascript:void(0);"><span class="pagepre"></span></a></li>
+            </c:if>
+            <c:if test="${pageBean.index != 1}">
+                <li class="paginItem"><a href="javascript:changePage(${pageBean.index - 1});"><span
+                        class="pagepre"></span></a></li>
+            </c:if>
+            <c:forEach items="${pageBean.numbers}" var="num">
+                <c:if test="${pageBean.index == num}">
+                    <li class="paginItem current"><a href="javascript:changePage(${num});">${num}</a></li>
+                </c:if>
+                <c:if test="${pageBean.index != num}">
+                    <li class="paginItem"><a href="javascript:changePage(${num});">${num}</a></li>
+                </c:if>
+            </c:forEach>
+            <c:if test="${pageBean.index == pageBean.totalPageCount}">
+                <li class="paginItem current"><a href="javascript:void(0);"><span class="pagenxt"></span></a></li>
+            </c:if>
+            <c:if test="${pageBean.index != pageBean.totalPageCount}">
+                <li class="paginItem"><a href="javascript:changePage(${pageBean.index + 1});"><span
+                        class="pagenxt"></span></a></li>
+            </c:if>
+        </ul>
+    </div>
 
 </div>
 

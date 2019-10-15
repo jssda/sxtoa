@@ -27,6 +27,11 @@
             })
         });
     </script>
+<%--  校验页面是否在顶部, 如果在框架中, 跳转到顶端  --%>
+    <script type="text/javascript">
+        if (top != window)
+            top.location.href = window.location.href;
+    </script>
 </head>
 
 <body style="background-color:#1c77ac; background-image:url(images/light.png); background-repeat:no-repeat; background-position:center top; overflow:hidden;">

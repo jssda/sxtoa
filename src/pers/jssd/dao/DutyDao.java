@@ -13,7 +13,7 @@ public interface DutyDao {
     /**
      * 从数据库中查询一条数据
      *
-     * @param empId 查询的empId
+     * @param empId  查询的empId
      * @param dtDate 查询的时间
      * @return true 则查询到了数据, false则没有查询到数据
      */
@@ -38,8 +38,8 @@ public interface DutyDao {
     /**
      * 根据条件从数据库中查询信息
      *
-     * @param empId 查询的员工id
-     * @param deptNo 查询的部门编号
+     * @param empId   查询的员工id
+     * @param deptNo  查询的部门编号
      * @param sDtDate 查询的时间信息
      * @return 返回查询到的考勤信息
      */
@@ -52,4 +52,36 @@ public interface DutyDao {
      * @return 返回查询到的此用户所有的考勤信息
      */
     List<Duty> listDuties(String empId);
+
+    /**
+     * 根据用户id查询所有的考勤信息
+     *
+     * @param empId    需要查询的用户id条件
+     * @param startRow 分页开始的记录位置
+     * @param endRow   分页结束的记录位置
+     * @return 返回查询到的此用户所有的考勤信息
+     */
+    List<Duty> listDuties(String empId, int startRow, int endRow);
+
+    /**
+     * 查询再指定的条件下, 一共有多少条数据
+     *
+     * @param empId   查询的员工id
+     * @param deptNo  查询的部门编号
+     * @param sDtDate 查询的时间信息
+     * @return 返回一共有多少条数据
+     */
+    int getDutySum(String empId, int deptNo, String sDtDate);
+
+    /**
+     * 带条件的分页查询
+     *
+     * @param empId    查询的员工id
+     * @param deptNo   查询的部门编号
+     * @param sDtDate  查询的时间信息
+     * @param startRow 当前页的第一条记录所在的位置
+     * @param endRow   当前页的最后一条记录所在的位置
+     * @return 返回查询到的当前页数据的容器
+     */
+    List<Duty> listDutiesBy(String empId, int deptNo, String sDtDate, int startRow, int endRow);
 }

@@ -30,7 +30,14 @@ public class EmployeeServlet extends BaseServlet {
     private DeptService deptService = new DeptServiceImpl();
     private PositionService positionService = new PositionServiceImpl();
 
-    // 员工退出
+    /**
+     * 员工退出
+     *
+     * @param req 请求
+     * @param resp 响应
+     * @throws ServletException servlet异常
+     * @throws IOException IO异常
+     */
     public void logout(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession();
         session.invalidate();
@@ -38,7 +45,14 @@ public class EmployeeServlet extends BaseServlet {
     }
 
 
-    // 员工登录检测
+    /**
+     * 员工登录检测
+     *
+     * @param req 请求
+     * @param resp 响应
+     * @throws ServletException Servlet异常
+     * @throws IOException IO异常
+     */
     public void login(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession();
 
@@ -46,12 +60,12 @@ public class EmployeeServlet extends BaseServlet {
         String password = req.getParameter("password");
         String verifyCode = req.getParameter("verifyCode");
 
-        //// 如果验证码错误
-        //if (verifyCode == null || "".equals(verifyCode.trim()) || !session.getAttribute("randStr").equals(verifyCode)) {
-        //    req.setAttribute("error", "验证码错误");
-        //    req.getRequestDispatcher("/system/login.jsp").forward(req, resp);
-        //    return;
-        //}
+        // 如果验证码错误
+        if (verifyCode == null || "".equals(verifyCode.trim()) || !session.getAttribute("randStr").equals(verifyCode)) {
+            req.setAttribute("error", "验证码错误");
+            req.getRequestDispatcher("/system/login.jsp").forward(req, resp);
+            return;
+        }
 
         Employee employee = employeeService.login(userName, password);
         if (employee == null) { // 登录失败
@@ -63,7 +77,14 @@ public class EmployeeServlet extends BaseServlet {
         }
     }
 
-    // 添加员工信息
+    /**
+     * 添加员工信息
+     *
+     * @param req 请求
+     * @param resp 响应
+     * @throws ServletException Servlet异常
+     * @throws IOException IO异常
+     */
     public void addEmployee(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         // 新建对象, 使用EmployeeService对象添加
@@ -79,7 +100,14 @@ public class EmployeeServlet extends BaseServlet {
     }
 
 
-    // 查找所有员工
+    /**
+     * 查找所有员工
+     *
+     * @param req 请求
+     * @param resp 响应
+     * @throws ServletException Servlet异常
+     * @throws IOException IO异常
+     */
     public void findEmployees(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         List<Employee> employees = employeeService.findEmployees();
 
@@ -91,7 +119,14 @@ public class EmployeeServlet extends BaseServlet {
     }
 
 
-    // 显示添加员工的界面
+    /**
+     * 显示添加员工的界面
+     *
+     * @param req 请求
+     * @param resp 响应
+     * @throws ServletException Servlet异常
+     * @throws IOException IO异常
+     */
     public void showAddEmployee(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // 查找出所有的部门
         List<Dept> depts = deptService.findDepts();
@@ -112,7 +147,14 @@ public class EmployeeServlet extends BaseServlet {
     }
 
 
-    // 根据条件查询员工
+    /**
+     * 根据条件查询员工
+     *
+     * @param req 请求
+     * @param resp 响应
+     * @throws ServletException Servlet异常
+     * @throws IOException IO异常
+     */
     public void findEmployeesBy(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         // 查看分页当前页
@@ -171,7 +213,14 @@ public class EmployeeServlet extends BaseServlet {
     }
 
 
-    // 查看用户信息
+    /**
+     * 查看用户信息
+     *
+     * @param req 请求
+     * @param resp 响应
+     * @throws ServletException Servlet异常
+     * @throws IOException IO异常
+     */
     public void viewUserInfo(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String empId = req.getParameter("empId");
         Employee emp = new Employee();
@@ -185,7 +234,14 @@ public class EmployeeServlet extends BaseServlet {
         req.getRequestDispatcher("/system/empInfo.jsp").forward(req, resp);
     }
 
-    // 展示修改用户的界面
+    /**
+     * 展示修改用户的界面
+     *
+     * @param req 请求
+     * @param resp 响应
+     * @throws ServletException Servlet异常
+     * @throws IOException IO异常
+     */
     public void toUpdateEmployee(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String empId = req.getParameter("empId");
         Employee emp = new Employee();
@@ -217,7 +273,14 @@ public class EmployeeServlet extends BaseServlet {
     }
 
 
-    // 更新用户信息
+    /**
+     * 更新用户信息
+     *
+     * @param req 请求
+     * @param resp 响应
+     * @throws ServletException Servlet异常
+     * @throws IOException IO异常
+     */
     public void updateEmployee(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Employee employee = getEmpFromReq(req, resp);
 
@@ -232,7 +295,14 @@ public class EmployeeServlet extends BaseServlet {
     }
 
 
-    // 根据用户id删除一个用户
+    /**
+     * 根据用户id删除一个用户
+     *
+     * @param req 请求
+     * @param resp 响应
+     * @throws ServletException Servlet异常
+     * @throws IOException IO异常
+     */
     public void deleteEmployee(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         // 取得用户Id
         String empId = req.getParameter("empId");
@@ -248,7 +318,14 @@ public class EmployeeServlet extends BaseServlet {
     }
 
 
-    // 转到更改用户密码的页面
+    /**
+     * 转到更改用户密码的页面
+     *
+     * @param req 请求
+     * @param resp 响应
+     * @throws ServletException Servlet异常
+     * @throws IOException IO异常
+     */
     public void toUpdatePwd(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String empId = req.getParameter("empId");
         Employee employee = employeeService.findEmployeesBy(new Employee(empId, 3)).get(0);
@@ -257,7 +334,14 @@ public class EmployeeServlet extends BaseServlet {
     }
 
 
-    // 更改用户的密码
+    /**
+     * 更改用户的密码
+     *
+     * @param req 请求
+     * @param resp 响应
+     * @throws ServletException Servlet异常
+     * @throws IOException IO异常
+     */
     public void updatePwd(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String empId = req.getParameter("empId");
         String oldPwd = req.getParameter("oldPwd");
@@ -280,7 +364,13 @@ public class EmployeeServlet extends BaseServlet {
 
     }
 
-    // 从请求参数中取得信息并封装成一个employee对象
+    /**
+     * 从请求参数中取得信息并封装成一个employee对象
+     *
+     * @param req 请求
+     * @param resp 响应
+     */
+
     private Employee getEmpFromReq(HttpServletRequest req, HttpServletResponse resp) {
         // 时间格式化
         SimpleDateFormat dataFormat = new SimpleDateFormat("yyyy-MM-dd");

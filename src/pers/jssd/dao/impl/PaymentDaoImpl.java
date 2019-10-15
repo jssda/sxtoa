@@ -133,6 +133,113 @@ public class PaymentDaoImpl implements PaymentDao {
     }
 
     @Override
+    public List<Payment> listPaymentBy(Date start, Date end, String payEmpId, String paymentType, int startRow, int endRow) throws SQLException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        List<Payment> paymentList = new ArrayList<>();
+
+        conn = DBUtil2.getConnection();
+
+        StringBuilder sql = new StringBuilder("select *\n" +
+                "from (select ROWNUM rn, temp.*\n" +
+                "      from ("+
+                "select p.pid,\n" +
+                "       p.payempid,\n" +
+                "       e.realName as \"payEmpRealName\",\n" +
+                "       p.paytime,\n" +
+                "       p.expid,\n" +
+                "       p.empid,\n" +
+                "       e2.REALNAME   \"payedRealName\",\n" +
+                "       ei.type,\n" +
+                "       ei.AMOUNT,\n" +
+                "       ei.itemdesc\n" +
+                "from payment p\n" +
+                "         join expenseitem ei\n" +
+                "              on p.expid = ei.expid\n" +
+                "         join employee e\n" +
+                "              on e.empid = p.payempid\n" +
+                "         left join employee e2\n" +
+                "                   on p.empid = e2.EMPID\n" +
+                "where 1 = 1");
+
+
+
+        if (start != null) {
+            sql.append(" and to_char(p.paytime, 'yyyy-MM-dd') > ?");
+        }
+        if (end != null) {
+            sql.append(" and to_char(p.paytime, 'yyyy-MM-dd' <= ?");
+        }
+        if (payEmpId != null && !"".equals(payEmpId.trim())) {
+            sql.append(" and e.realName = ?");
+        }
+        if (!"0".equals(paymentType)) {
+            sql.append(" and ei.type = ?");
+        }
+        sql.append(") temp\n" +
+                "      where ROWNUM <= ?)\n" +
+                "where rn > ?");
+
+        ps = conn.prepareStatement(sql.toString());
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+
+        int i = 1;
+        if (start != null) {
+            ps.setString(i++, format.format(start));
+        }
+        if (end != null) {
+            ps.setString(i++, format.format(end));
+        }
+        if (payEmpId != null && !"".equals(payEmpId.trim())) {
+            ps.setString(i++, payEmpId);
+        }
+        if (!"0".equals(paymentType)) {
+            ps.setString(i++, paymentType);
+        }
+
+        ps.setInt(i++, endRow);
+        ps.setInt(i, startRow);
+
+        rs = ps.executeQuery();
+        while (rs.next()) {
+            /*
+            类型 	金额 	备注 	    支出人 	支出时间   	 操作
+            项目开发 	30000 	财务管理系统 	成林 	2013-09-08 	 查看
+             */
+            Payment payment = new Payment();
+            payment.setpId(rs.getInt("pId"));
+            payment.setPayTime(rs.getTimestamp("payTime"));
+            payment.setPayEmpId(rs.getString("payEmpId"));
+            payment.setEmpId(rs.getString("empId"));
+            payment.setExpId(rs.getInt("expId"));
+
+            Employee payEmp = new Employee(rs.getString("payEmpId"), rs.getString("payEmpRealName"));
+            payment.setPayEmp(payEmp);
+
+            Employee emp = new Employee(rs.getString("empId"), rs.getString("payedRealName"));
+            payment.setEmp(emp);
+
+            ExpenseItem expenseItem = new ExpenseItem();
+            expenseItem.setType(rs.getString("type"));
+            expenseItem.setAmount(rs.getInt("AMOUNT"));
+            expenseItem.setItemDesc(rs.getString("itemdesc"));
+            List<ExpenseItem> list = new ArrayList<>();
+            list.add(expenseItem);
+
+            Expense expense = new Expense();
+            expense.setExpId(rs.getInt("expId"));
+            expense.setExpenseItems(list);
+
+            payment.setExpense(expense);
+
+            paymentList.add(payment);
+        }
+
+        return paymentList;
+    }
+
+    @Override
     public List<Object[]> getStaticData(String val) throws SQLException {
 
         Connection conn = null;
@@ -169,5 +276,60 @@ public class PaymentDaoImpl implements PaymentDao {
         DBUtil2.closeAll(rs, ps, conn);
 
         return objectList;
+    }
+
+    @Override
+    public int getPaymentSumBy(Date start, Date end, String payEmpId, String paymentType) throws SQLException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        int count = 0;
+
+        conn = DBUtil2.getConnection();
+        StringBuilder sql = new StringBuilder("select count(*) " +
+                "from payment p\n" +
+                "         join expenseitem ei\n" +
+                "              on p.expid = ei.expid\n" +
+                "         join employee e\n" +
+                "              on e.empid = p.payempid\n" +
+                "         left join employee e2\n" +
+                "                   on p.empid = e2.EMPID\n" +
+                "where 1 = 1");
+
+        if (start != null) {
+            sql.append(" and to_char(p.paytime, 'yyyy-MM-dd') > ?");
+        }
+        if (end != null) {
+            sql.append(" and to_char(p.paytime, 'yyyy-MM-dd' <= ?");
+        }
+        if (payEmpId != null && !"".equals(payEmpId.trim())) {
+            sql.append(" and e.realName = ?");
+        }
+        if (!"0".equals(paymentType)) {
+            sql.append(" and ei.type = ?");
+        }
+
+        ps = conn.prepareStatement(sql.toString());
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+
+        int i = 1;
+        if (start != null) {
+            ps.setString(i++, format.format(start));
+        }
+        if (end != null) {
+            ps.setString(i++, format.format(end));
+        }
+        if (payEmpId != null && !"".equals(payEmpId.trim())) {
+            ps.setString(i++, payEmpId);
+        }
+        if (!"0".equals(paymentType)) {
+            ps.setString(i, paymentType);
+        }
+
+        rs = ps.executeQuery();
+        rs.next();
+        count = rs.getInt(1);
+
+        return count;
     }
 }

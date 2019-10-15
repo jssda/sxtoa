@@ -13,6 +13,7 @@ import pers.jssd.entity.Payment;
 import pers.jssd.service.AuditService;
 import pers.jssd.util.Constant;
 import pers.jssd.util.DBUtil2;
+import pers.jssd.util.PageBean;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -185,5 +186,42 @@ public class AuditServiceImpl implements AuditService {
         }
 
         return auditingList;
+    }
+
+    @Override
+    public void findAuditingByEmpId(String empId, PageBean<Auditing> pageBean) {
+        Connection connection = null;
+        List<Auditing> auditingList = null;
+        try {
+            connection = DBUtil2.getConnection();
+
+            // 设置每页显示的数据量
+            pageBean.setSize(13);
+            // 设置默认的显示页码数组长度
+            pageBean.setDefaultNumberLength(5);
+
+            int sum = auditingDao.getAuditingSumBy(empId);
+            // 设置总页数, 设置总页数的同时, 会自动计算出一共有多少页,
+            pageBean.setTotalCount(sum);
+
+            int startRow = pageBean.getStartRow();
+            int endRow = pageBean.getEndRow();
+
+            auditingList = auditingDao.listAuditingByEmpId(empId, startRow, endRow);
+            pageBean.setList(auditingList);
+
+            connection.setAutoCommit(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        } finally {
+            DBUtil2.closeAll(null, null, connection);
+        }
     }
 }

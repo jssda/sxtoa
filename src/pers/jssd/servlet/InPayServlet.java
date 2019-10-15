@@ -2,14 +2,12 @@ package pers.jssd.servlet;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import pers.jssd.entity.Dept;
-import pers.jssd.entity.Employee;
-import pers.jssd.entity.Income;
-import pers.jssd.entity.Payment;
+import pers.jssd.entity.*;
 import pers.jssd.service.DeptService;
 import pers.jssd.service.InPayService;
 import pers.jssd.service.impl.DeptServiceImpl;
 import pers.jssd.service.impl.InPayServiceImpl;
+import pers.jssd.util.PageBean;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -94,6 +92,19 @@ public class InPayServlet extends BaseServlet {
      * @throws IOException      io异常
      */
     public void findIncomeBy(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+        // 取得当前页
+        PageBean<Income> pageBean = new PageBean<>();
+        String sIndex = req.getParameter("index");
+        int index = 1;
+
+        try {
+            index = Integer.parseInt(sIndex);
+        } catch (NumberFormatException e) {
+            //e.printStackTrace();
+        }
+        pageBean.setIndex(index);
+
         String startTime = req.getParameter("startTime");
         String endTime = req.getParameter("endTime");
         String icType = req.getParameter("icType");
@@ -109,10 +120,10 @@ public class InPayServlet extends BaseServlet {
             if (endTime != null && !"".equals(endTime.trim())) {
                 end = format.parse(endTime);
             }
-            List<Income> incomeList = inPayService.findIncomeBy(start, end, icType);
+            inPayService.findIncomeBy(start, end, icType, pageBean);
 
-            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd hhhh:mm:ss").create();
-            resp.getWriter().println(gson.toJson(incomeList));
+            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd hh:mm:ss").create();
+            resp.getWriter().println(gson.toJson(pageBean));
 
         } catch (ParseException e) {
             e.printStackTrace();
@@ -128,6 +139,18 @@ public class InPayServlet extends BaseServlet {
      * @throws IOException      IO异常
      */
     public void findPaymentBy(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // 取得当前页
+        PageBean<Payment> pageBean = new PageBean<>();
+        String sIndex = req.getParameter("index");
+        int index = 1;
+
+        try {
+            index = Integer.parseInt(sIndex);
+        } catch (NumberFormatException e) {
+            //e.printStackTrace();
+        }
+        pageBean.setIndex(index);
+
         String startTime = req.getParameter("startTime");
         String endTime = req.getParameter("endTime");
         String payEmpId = req.getParameter("payEmpId");
@@ -143,10 +166,10 @@ public class InPayServlet extends BaseServlet {
             if (endTime != null && !"".equals(endTime.trim())) {
                 end = format.parse(endTime);
             }
-            List<Payment> paymentList = inPayService.findPaymentBy(start, end, payEmpId, paymentType);
+            inPayService.findPaymentBy(start, end, payEmpId, paymentType, pageBean);
 
-            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd hhhh:mm:ss").create();
-            resp.getWriter().println(gson.toJson(paymentList));
+            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd hh:mm:ss").create();
+            resp.getWriter().println(gson.toJson(pageBean));
 
         } catch (ParseException e) {
             e.printStackTrace();
@@ -169,6 +192,13 @@ public class InPayServlet extends BaseServlet {
         resp.getWriter().println(json);
     }
 
+    /**
+     * 查看支出统计
+     *
+     * @param req  请求
+     * @param resp 响应
+     * @throws IOException IO异常
+     */
     public void showPaymentStatic(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String val = req.getParameter("val");
         String str = inPayService.getPaymentStaticStr(val);

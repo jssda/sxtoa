@@ -1,3 +1,5 @@
+<%@ page import="javax.xml.crypto.Data" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%--
   Created by IntelliJ IDEA.
   User: jssdjing@gmail.com
@@ -70,36 +72,11 @@
                 }
             });
 
+            searchForServler();
 
             // 绑定ajax查询
             $("#search").click(function () {
-                var $sEmpId = $("#sEmpId").val();
-                var $sDeptId = $("#sDeptId").val();
-                var $sDtDate = $("#sDtDate").val();
-
-                // 使用ajax查询内容, 并操作dom显示在页面
-                $.ajax({
-                    url: "servlet/dutyServlet?method=findDuty",
-                    type: "POST",
-                    data: {empId: $sEmpId, deptNo: $sDeptId, dtDate: $sDtDate},
-                    success: function (jsonStr) {
-                        var arr = JSON.parse(jsonStr);
-                        var str = "";
-
-                        for (var i = 0; i < arr.length; i++) {
-                            str += '     <tr>\n' +
-                                '            <td><input name="" type="checkbox" value=""/></td>\n' +
-                                '            <td>' + arr[i].empId + '</td>\n' +
-                                '            <td>' + arr[i].employee.realName + '</td>\n' +
-                                '            <td>' + arr[i].employee.dept.deptName + '</td>\n' +
-                                '            <td>' + arr[i].dtDate + '</td>\n' +
-                                '            <td>' + arr[i].signInTime + '</td>\n' +
-                                '            <td>' + arr[i].signOutTime + '</td>\n' +
-                                '        </tr>';
-                        }
-                        $("#showDuty").html(str);
-                    },
-                });
+                searchForServler();
             });
 
             // 添加日期插件
@@ -121,6 +98,55 @@
                     $sDeptId + "&dtDate=" + $sDtDate;
             });
         });
+
+        // ajax 查询所有数据
+        function searchForServler(index) {
+            var $sEmpId = $("#sEmpId").val();
+            var $sDeptId = $("#sDeptId").val();
+            var $sDtDate = $("#sDtDate").val();
+
+            // 使用ajax查询内容, 并操作dom显示在页面
+            $.ajax({
+                url: "servlet/dutyServlet?method=findDuty&index=" + index,
+                type: "POST",
+                data: {empId: $sEmpId, deptNo: $sDeptId, dtDate: $sDtDate},
+                success: function (jsonStr) {
+                    var data = JSON.parse(jsonStr);
+                    var arr = data.list;
+
+                    var str = "";
+                    for (var i = 0; i < arr.length; i++) {
+                        str += '     <tr>\n' +
+                            '            <td>' + arr[i].empId + '</td>\n' +
+                            '            <td>' + arr[i].employee.realName + '</td>\n' +
+                            '            <td>' + arr[i].employee.dept.deptName + '</td>\n' +
+                            '            <td>' + arr[i].dtDate + '</td>\n' +
+                            '            <td>' + arr[i].signInTime + '</td>\n' +
+                            '            <td>' + (arr[i].signOutTime == undefined ? "" : arr[i].signOutTime) + '</td>\n' +
+                            '        </tr>';
+                    }
+                    $("#showDuty").html(str);
+
+                    var pageIndexStr = '<div class="message">共&nbsp;<i class="blue">' + data.totalCount + '</i>&nbsp;条记录，' +
+                        '共&nbsp;<i class="blue">' + data.totalPageCount + '</i>&nbsp;页, 当前显示第&nbsp;<i class="blue">' + data.index + '&nbsp;</i>页' +
+                        '</div>' +
+                        '<ul class="paginList">\n' +
+                        '\t<li class="paginItem"><a href="javascript:searchForServler(' + (data.index - 1 <= 1 ? 1 : data.index - 1) + ');"><span class="pagepre"></span></a></li>\n';
+
+                    for (i = 0; i < data.numbers.length; i++) {
+                        if (data.numbers[i] != data.index) {
+                            pageIndexStr += '\t<li class="paginItem"><a href="javascript:searchForServler(' + data.numbers[i] + ');">' + data.numbers[i] + '</a></li>\n';
+                        } else {
+                            pageIndexStr += '\t<li class="paginItem current"><a href="javascript:searchForServler(' + data.numbers[i] + ');">' + data.numbers[i] + '</a></li>\n';
+                        }
+                    }
+                    pageIndexStr += '\t<li class="paginItem"><a href="javascript:searchForServler(' + (data.index + 1 >= data.totalPageCount ? data.totalPageCount : data.index + 1) + ');"><span class="pagenxt"></span></a></li>\n' +
+                        '</ul>\n';
+
+                    $(".pagin").html(pageIndexStr);
+                },
+            });
+        }
     </script>
 </head>
 
@@ -171,7 +197,6 @@
     <table class="tablelist">
         <thead>
         <tr>
-            <th><input name="" type="checkbox" value="" checked="checked"/></th>
             <th>用户名<i class="sort"><img src="images/px.gif"/></i></th>
             <th>真实姓名</th>
             <th>所属部门</th>
@@ -183,20 +208,7 @@
         <tbody id="showDuty"></tbody>
     </table>
 
-    <div class="pagin">
-        <div class="message">共<i class="blue">1256</i>条记录，当前显示第&nbsp;<i class="blue">2&nbsp;</i>页</div>
-        <ul class="paginList">
-            <li class="paginItem"><a href="javascript:void(0);"><span class="pagepre"></span></a></li>
-            <li class="paginItem"><a href="javascript:void(0);">1</a></li>
-            <li class="paginItem current"><a href="javascript:void(0);">2</a></li>
-            <li class="paginItem"><a href="javascript:void(0);">3</a></li>
-            <li class="paginItem"><a href="javascript:void(0);">4</a></li>
-            <li class="paginItem"><a href="javascript:void(0);">5</a></li>
-            <li class="paginItem more"><a href="javascript:void(0);">...</a></li>
-            <li class="paginItem"><a href="javascript:void(0);">10</a></li>
-            <li class="paginItem"><a href="javascript:void(0);"><span class="pagenxt"></span></a></li>
-        </ul>
-    </div>
+    <div class="pagin"></div>
 
     <div class="tip">
         <div class="tiptop"><span>提示信息</span>

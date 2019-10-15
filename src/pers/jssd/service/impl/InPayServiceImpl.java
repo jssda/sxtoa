@@ -8,6 +8,7 @@ import pers.jssd.entity.Income;
 import pers.jssd.entity.Payment;
 import pers.jssd.service.InPayService;
 import pers.jssd.util.DBUtil2;
+import pers.jssd.util.PageBean;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -81,6 +82,45 @@ public class InPayServiceImpl implements InPayService {
     }
 
     @Override
+    public void findIncomeBy(Date start, Date end, String icType, PageBean<Income> pageBean) {
+        Connection conn = null;
+        List<Income> incomeList = null;
+        try {
+            conn = DBUtil2.getConnection();
+            conn.setAutoCommit(false);
+
+            // 设置每页显示的数据量
+            pageBean.setSize(13);
+            // 设置默认的显示页码数组长度
+            pageBean.setDefaultNumberLength(5);
+
+            int sum = incomeDao.getIncomeSumBy(start, end, icType);
+            // 设置总页数, 设置总页数的同时, 会自动计算出一共有多少页,
+            pageBean.setTotalCount(sum);
+
+            int startRow = pageBean.getStartRow();
+            int endRow = pageBean.getEndRow();
+
+            // 添加收入信息
+            incomeList = incomeDao.listIncomeBy(start, end, icType,startRow, endRow);
+            pageBean.setList(incomeList);
+
+            conn.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        } finally {
+            DBUtil2.closeAll(null, null, conn);
+        }
+    }
+
+    @Override
     public String getIncomeStaticStr() {
         StringBuilder sb = new StringBuilder();
         try {
@@ -147,6 +187,46 @@ public class InPayServiceImpl implements InPayService {
         }
 
         return paymentList;
+    }
+
+    @Override
+    public void findPaymentBy(Date start, Date end, String payEmpId, String paymentType, PageBean<Payment> pageBean) {
+        Connection conn = null;
+        List<Payment> paymentList = null;
+        try {
+            conn = DBUtil2.getConnection();
+            conn.setAutoCommit(false);
+
+            // 设置每页显示的数据量
+            pageBean.setSize(13);
+            // 设置默认的显示页码数组长度
+            pageBean.setDefaultNumberLength(5);
+
+            int sum = paymentDao.getPaymentSumBy(start, end, payEmpId, paymentType);
+
+            // 设置总页数, 设置总页数的同时, 会自动计算出一共有多少页,
+            pageBean.setTotalCount(sum);
+
+            int startRow = pageBean.getStartRow();
+            int endRow = pageBean.getEndRow();
+
+            // 添加支出信息
+            paymentList = paymentDao.listPaymentBy(start, end, payEmpId, paymentType, startRow, endRow);
+            pageBean.setList(paymentList);
+
+            conn.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        } finally {
+            DBUtil2.closeAll(null, null, conn);
+        }
     }
 
     @Override

@@ -60,7 +60,9 @@
     <script type="text/javascript">
         // 分页实现
         function changePage(index) {
-            window.location = "servlet/employeeServlet?method=findEmployeesBy&index=" + index;
+            // window.location = "servlet/employeeServlet?method=findEmployeesBy&index=" + index;
+            $("form").attr("action", "servlet/employeeServlet?method=findEmployeesBy&index=" + index);
+            $("form").submit();
         }
     </script>
 </head>

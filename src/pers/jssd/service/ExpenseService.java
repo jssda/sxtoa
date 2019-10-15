@@ -4,6 +4,7 @@ import org.apache.commons.fileupload.FileItem;
 import pers.jssd.entity.ExpImage;
 import pers.jssd.entity.Expense;
 import pers.jssd.entity.ExpenseItem;
+import pers.jssd.util.PageBean;
 
 import java.util.List;
 
@@ -55,4 +56,11 @@ public interface ExpenseService {
      */
     List<ExpImage> findExpImage(int expId);
 
+    /**
+     * 分页查询查询指定用户id的报销单
+     *
+     * @param empId 查询指定用户id的报销单
+     * @param pageBean 分页信息
+     */
+    void findExpenseByEmpId(String empId, PageBean<Expense> pageBean);
 }

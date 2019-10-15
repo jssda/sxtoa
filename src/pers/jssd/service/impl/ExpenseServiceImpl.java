@@ -13,6 +13,7 @@ import pers.jssd.entity.ExpenseItem;
 import pers.jssd.service.ExpenseService;
 import pers.jssd.util.DBUtil;
 import pers.jssd.util.DBUtil2;
+import pers.jssd.util.PageBean;
 
 import java.io.File;
 import java.sql.Connection;
@@ -50,13 +51,13 @@ public class ExpenseServiceImpl implements ExpenseService {
                 expenseItemDao.insertExpenseItem(expenseItem);
             }
 
-            for (FileItem photo : photos) {
+            for (int i = 0; i < photos.size() && photos.get(i).getSize() > 0; i++) {
                 ExpImage image = new ExpImage();
                 image.setExpId(expense.getExpId());
-                image.setRealName(photo.getName());
-                image.setFileType(photo.getContentType());
+                image.setRealName(photos.get(i).getName());
+                image.setFileType(photos.get(i).getContentType());
                 UUID uuid = UUID.randomUUID();
-                String photoName = photo.getName();
+                String photoName = photos.get(i).getName();
                 String fileName = uuid + photoName.substring(photoName.lastIndexOf("."));
                 image.setFileName(fileName);
                 expImageDao.insertExpImage(image);
@@ -66,7 +67,7 @@ public class ExpenseServiceImpl implements ExpenseService {
                     dir.mkdirs();
                 }
                 File file = new File(dir, fileName);
-                photo.write(file);
+                photos.get(i).write(file);
             }
 
             connection.commit();
@@ -119,6 +120,51 @@ public class ExpenseServiceImpl implements ExpenseService {
         }
 
         return expenseList;
+    }
+
+    @Override
+    public void findExpenseByEmpId(String empId, PageBean<Expense> pageBean) {
+
+        Connection connection = null;
+        List<Expense> expenseList = null;
+
+        try {
+
+            connection = DBUtil2.getConnection();
+            // 手动提交事务
+            connection.setAutoCommit(false);
+
+            // 设置每页显示的数据量
+            pageBean.setSize(13);
+            // 设置默认的显示页码数组长度
+            pageBean.setDefaultNumberLength(5);
+
+            int sum = expenseDao.getExpenseSumBy(empId);
+            // 设置总页数, 设置总页数的同时, 会自动计算出一共有多少页,
+            pageBean.setTotalCount(sum);
+
+            int startRow = pageBean.getStartRow();
+            int endRow = pageBean.getEndRow();
+
+            // 通过持久层查询expense信息, 包括其中的employee的id, realName, mgrId. 不包括其中的报销详情项
+            expenseList = expenseDao.listExpensesByEmpId(empId, startRow, endRow);
+            pageBean.setList(expenseList);
+
+            // 没有已成, 提交
+            connection.commit();
+        } catch (Exception e) {
+            try {
+                // 如果有异常, 回滚
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            e.printStackTrace();
+        } finally {
+            DBUtil2.closeAll(null, null, connection);
+        }
     }
 
     @Override

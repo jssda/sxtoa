@@ -11,6 +11,7 @@ import pers.jssd.service.DeptService;
 import pers.jssd.service.DutyService;
 import pers.jssd.service.impl.DeptServiceImpl;
 import pers.jssd.service.impl.DutyServiceImpl;
+import pers.jssd.util.PageBean;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -28,16 +29,43 @@ public class DutyServlet extends BaseServlet {
     private DutyService dutyService = new DutyServiceImpl();
     private DeptService deptService = new DeptServiceImpl();
 
-    // 显示我的考勤
+    /**
+     * 显示我的考勤
+     *
+     * @param req 请求
+     * @param resp 响应
+     * @throws ServletException Servlet异常
+     * @throws IOException IO异常
+     */
     public void toMyDuty(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // 取得当前页
+        PageBean<Duty> pageBean = new PageBean<>();
+        String sIndex = req.getParameter("index");
+        int index = 1;
+
+        try {
+            index = Integer.parseInt(sIndex);
+        } catch (NumberFormatException e) {
+            //e.printStackTrace();
+        }
+        pageBean.setIndex(index);
+
         Employee employee = (Employee) req.getSession().getAttribute("currUser");
         String empId = employee.getEmpId();
-        List<Duty> duties = dutyService.findDuties(empId);
-        req.setAttribute("duties", duties);
+
+        dutyService.findDuties(empId, pageBean);
+
+        req.setAttribute("pageBean", pageBean);
         req.getRequestDispatcher("/duty/myDuty.jsp").forward(req, resp);
     }
 
-    // 签到
+    /**
+     * 签到
+     *
+     * @param req 请求
+     * @param resp 响应
+     * @throws IOException IO异常
+     */
     public void signIn(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Employee currUser = (Employee) req.getSession().getAttribute("currUser");
         String empId = currUser.getEmpId();
@@ -57,7 +85,13 @@ public class DutyServlet extends BaseServlet {
         }
     }
 
-    // 签退
+    /**
+     * 签退
+     *
+     * @param req 请求
+     * @param resp 响应
+     * @throws IOException IO异常
+     */
     public void signOut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Employee currUser = (Employee) req.getSession().getAttribute("currUser");
         String empId = currUser.getEmpId();
@@ -78,15 +112,40 @@ public class DutyServlet extends BaseServlet {
         }
     }
 
-    // 管理duty页面加载所有的部门
+    /**
+     * 管理duty页面加载所有的部门
+     *
+     * @param req 请求
+     * @param resp 响应
+     * @throws IOException IO异常
+     */
     public void findAllDept(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         List<Dept> depts = deptService.findDepts();
         Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
         resp.getWriter().println(gson.toJson(depts));
     }
 
-    // 根据条件查询考勤信息
+    /**
+     * 根据条件查询考勤信息
+     *
+     * @param req 请求
+     * @param resp 响应
+     * @throws IOException IO异常
+     */
     public void findDuty(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+
+        PageBean<Duty> pageBean = new PageBean<>();
+        String sIndex = req.getParameter("index");
+        int index = 1;
+
+        try {
+            index = Integer.parseInt(sIndex);
+        } catch (NumberFormatException e) {
+            //e.printStackTrace();
+        }
+
+        pageBean.setIndex(index);
+
         String strEmpId = req.getParameter("empId");
         String strDeptNo = req.getParameter("deptNo");
         int deptNo = 0;
@@ -98,14 +157,25 @@ public class DutyServlet extends BaseServlet {
         }
 
         String sDtDate = req.getParameter("dtDate");
-        List<Duty> duties = dutyService.findDuties(strEmpId, deptNo, sDtDate);
+
+        dutyService.findDuties(strEmpId, deptNo, sDtDate, pageBean);
         PrintWriter writer = resp.getWriter();
 
-        Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
-        writer.println(gson.toJson(duties));
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.setDateFormat("yyyy-MM-dd");
+        Gson gson = gsonBuilder.create();
+
+        String json = gson.toJson(pageBean);
+        writer.println(json);
     }
 
-    // 导出一个excel表格
+    /**
+     * 导出一个excel表格
+     *
+     * @param req 请求
+     * @param resp 响应
+     * @throws IOException IO异常
+     */
     public void export(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String strEmpId = req.getParameter("empId");
         String strDeptNo = req.getParameter("deptNo");

@@ -193,7 +193,7 @@ public class PageBean<T> {
      * @param totalPageCount 所有页数
      */
     private void setNumbers(int totalPageCount) {
-        if (totalPageCount > 0) {
+        if (totalPageCount >= 0) {
             //!.当前数组的长度
             int[] numbers = new int[Math.min(totalPageCount, defaultNumberLength)];//页面要显示的页数集合
             int k = 0;

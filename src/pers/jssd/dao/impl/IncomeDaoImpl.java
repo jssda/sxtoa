@@ -89,6 +89,72 @@ public class IncomeDaoImpl implements IncomeDao {
     }
 
     @Override
+    public List<Income> listIncomeBy(Date start, Date end, String icType, int startRow, int endRow) throws SQLException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        List<Income> incomeList = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder("select *\n" +
+                "from (select ROWNUM rn, temp.*\n" +
+                "      from ("+
+                "select i.*, E.REALNAME\n" +
+                "from income i\n" +
+                "         join EMPLOYEE E on i.USERID = E.EMPID\n" +
+                "where 1 = 1");
+
+
+
+        conn = DBUtil2.getConnection();
+
+        if (start != null) {
+            sql.append(" and to_char(icDate, 'yyyy-MM-dd') > ?");
+        }
+        if (end != null) {
+            sql.append(" and to_char(icDate, 'yyyy-MM-dd' <= ?");
+        }
+        if (!"0".equals(icType)) {
+            sql.append(" and icType = ?");
+        }
+
+        sql.append(") temp\n").append("      where ROWNUM <= ?)\n").append("where rn > ?");
+
+        ps = conn.prepareStatement(sql.toString());
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+
+        int i = 1;
+        if (start != null) {
+            ps.setString(i ++, format.format(start));
+        }
+        if (end != null) {
+            ps.setString(i ++, format.format(end));
+        }
+        if (!"0".equals(icType)) {
+            ps.setString(i++, icType);
+        }
+        ps.setInt(i++, endRow);
+        ps.setInt(i, startRow);
+
+        rs = ps.executeQuery();
+        while (rs.next()) {
+            Income income = new Income();
+            income.setIcId(rs.getInt("icId"));
+            income.setInDesc(rs.getString("inDesc"));
+            income.setIcType(rs.getString("icType"));
+            income.setIcDate(rs.getDate("icDate"));
+            income.setAmount(rs.getInt("amount"));
+
+            income.setUserId(rs.getString("userId"));
+            Employee user = new Employee(rs.getString("userId"), rs.getString("realName"));
+            income.setUser(user);
+
+            incomeList.add(income);
+        }
+
+        return incomeList;
+    }
+
+    @Override
     public List<Object[]> getStaticData() throws SQLException {
         Connection conn = null;
         PreparedStatement ps = null;
@@ -110,5 +176,49 @@ public class IncomeDaoImpl implements IncomeDao {
         DBUtil2.closeAll(rs, ps, conn);
 
         return objectList;
+    }
+
+    @Override
+    public int getIncomeSumBy(Date start, Date end, String icType) throws SQLException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        int count = 0;
+
+        StringBuilder sql = new StringBuilder("select count(*)" +
+                "from income i\n" +
+                "         join EMPLOYEE E on i.USERID = E.EMPID\n" +
+                "where 1 = 1");
+        conn = DBUtil2.getConnection();
+
+        if (start != null) {
+            sql.append(" and to_char(icDate, 'yyyy-MM-dd') > ?");
+        }
+        if (end != null) {
+            sql.append(" and to_char(icDate, 'yyyy-MM-dd' <= ?");
+        }
+        if (!"0".equals(icType)) {
+            sql.append(" and icType = ?");
+        }
+
+        ps = conn.prepareStatement(sql.toString());
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+
+        int i = 1;
+        if (start != null) {
+            ps.setString(i ++, format.format(start));
+        }
+        if (end != null) {
+            ps.setString(i ++, format.format(end));
+        }
+        if (!"0".equals(icType)) {
+            ps.setString(i, icType);
+        }
+
+        rs = ps.executeQuery();
+        rs.next();
+        count = rs.getInt(1);
+
+        return count;
     }
 }

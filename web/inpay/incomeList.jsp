@@ -56,7 +56,9 @@
         $(function () {
             searchIncome();
 
-            $("input[name=search]").click(searchIncome);
+            $("input[name=search]").click(function () {
+                searchIncome(0);
+            });
 
             // 添加日期插件
             $("input[name=startTime], input[name=endTime]").each(function () {
@@ -67,20 +69,21 @@
             });
         })
 
-        function searchIncome() {
+        function searchIncome(index) {
             var startTime = $("input[name=startTime]").val();
             var endTime = $("input[name=endTime]").val();
             var icType = $("select[name=icType]").val();
 
             // 发送ajax请求
             $.ajax({
-                url: "servlet/InPayServlet?method=findIncomeBy",
+                url: "servlet/InPayServlet?method=findIncomeBy&index="+index,
                 type: "POST",
                 data: {"startTime": startTime, "endTime": endTime, "icType": icType},
-                success: function (data) {
-                    var arr = JSON.parse(data);
+                success: function (jsonStr) {
+                    var data = JSON.parse(jsonStr);
                     var tbody = $("tbody");
                     var str = "";
+                    var arr = data.list;
                     for (var i = 0; i < arr.length; i++) {
                         str += '<tr>\n';
                         if (arr[i].icType == 1) {
@@ -96,14 +99,31 @@
                             '            <td>' + arr[i].inDesc + '</td>\n' +
                             '            <td>' + arr[i].user.realName + '</td>\n' +
                             '            <td>' + arr[i].icDate + '</td>\n' +
-                            '            <td><a href="' + arr[i].icId + '" class="tablelink">查看</a> ' +
-                            '<a href="#" class="tablelink"> 删除</a></td>\n' +
                             '        </tr>';
                     }
                     tbody.html(str);
+
+                    var pageIndexStr = '<div class="message">共&nbsp;<i class="blue">' + data.totalCount + '</i>&nbsp;条记录，' +
+                        '共&nbsp;<i class="blue">' + data.totalPageCount + '</i>&nbsp;页, 当前显示第&nbsp;<i class="blue">' + data.index + '&nbsp;</i>页' +
+                        '</div>' +
+                        '<ul class="paginList">\n' +
+                        '\t<li class="paginItem"><a href="javascript:searchIncome(' + (data.index - 1 <= 1 ? 1 : data.index - 1) + ');"><span class="pagepre"></span></a></li>\n';
+
+                    for (i = 0; i < data.numbers.length; i++) {
+                        if (data.numbers[i] != data.index) {
+                            pageIndexStr += '\t<li class="paginItem"><a href="javascript:searchIncome(' + data.numbers[i] + ');">' + data.numbers[i] + '</a></li>\n';
+                        } else {
+                            pageIndexStr += '\t<li class="paginItem current"><a href="javascript:searchIncome(' + data.numbers[i] + ');">' + data.numbers[i] + '</a></li>\n';
+                        }
+                    }
+                    pageIndexStr += '\t<li class="paginItem"><a href="javascript:searchIncome(' + (data.index + 1 >= data.totalPageCount ? data.totalPageCount : data.index + 1) + ');"><span class="pagenxt"></span></a></li>\n' +
+                        '</ul>\n';
+
+                    $(".pagin").html(pageIndexStr);
                 }
-            })
+            });
         }
+
 
     </script>
 </head>
@@ -157,25 +177,13 @@
             <th>备注</th>
             <th>登记人</th>
             <th>登记时间</th>
-            <th>操作</th>
         </tr>
         </thead>
         <tbody></tbody>
     </table>
 
     <div class="pagin">
-        <div class="message">共<i class="blue">1256</i>条记录，当前显示第&nbsp;<i class="blue">2&nbsp;</i>页</div>
-        <ul class="paginList">
-            <li class="paginItem"><a href="javascript:;"><span class="pagepre"></span></a></li>
-            <li class="paginItem"><a href="javascript:;">1</a></li>
-            <li class="paginItem current"><a href="javascript:;">2</a></li>
-            <li class="paginItem"><a href="javascript:;">3</a></li>
-            <li class="paginItem"><a href="javascript:;">4</a></li>
-            <li class="paginItem"><a href="javascript:;">5</a></li>
-            <li class="paginItem more"><a href="javascript:;">...</a></li>
-            <li class="paginItem"><a href="javascript:;">10</a></li>
-            <li class="paginItem"><a href="javascript:;"><span class="pagenxt"></span></a></li>
-        </ul>
+
     </div>
 
     <div class="tip">

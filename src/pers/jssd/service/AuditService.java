@@ -1,6 +1,7 @@
 package pers.jssd.service;
 
 import pers.jssd.entity.Auditing;
+import pers.jssd.util.PageBean;
 
 import java.util.List;
 
@@ -24,10 +25,20 @@ public interface AuditService {
      */
     List<Auditing> findAuditingByExpId(int expId);
 
+
     /**
      * 查找指定用户所有的审核记录
+     *
      * @param empId 指定的用户
      * @return 查到的所有审核信息的容器
      */
     List<Auditing> findAuditingByEmpId(String empId);
+
+    /**
+     * 分页查找指定用户所有的审核记录
+     *
+     * @param empId 指定的用户
+     * @param pageBean 分页信息
+     */
+    void findAuditingByEmpId(String empId, PageBean<Auditing> pageBean);
 }

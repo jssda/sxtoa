@@ -6,12 +6,10 @@ import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import pers.jssd.entity.Employee;
-import pers.jssd.entity.ExpImage;
-import pers.jssd.entity.Expense;
-import pers.jssd.entity.ExpenseItem;
+import pers.jssd.entity.*;
 import pers.jssd.service.ExpenseService;
 import pers.jssd.service.impl.ExpenseServiceImpl;
+import pers.jssd.util.PageBean;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -149,7 +147,7 @@ public class ExpenseServlet extends BaseServlet {
     /**
      * 显示审核的时候的图片
      *
-     * @param req 请求
+     * @param req  请求
      * @param resp 响应
      */
     public void toExpenseImg(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -176,14 +174,25 @@ public class ExpenseServlet extends BaseServlet {
      * @throws IOException      产生的IO异常
      */
     public void toMyExpense(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+        // 取得当前页
+        PageBean<Expense> pageBean = new PageBean<>();
+        String sIndex = req.getParameter("index");
+        int index = 1;
+
+        try {
+            index = Integer.parseInt(sIndex);
+        } catch (NumberFormatException e) {
+            //e.printStackTrace();
+        }
+        pageBean.setIndex(index);
+
         HttpSession session = req.getSession();
         Employee currUser = (Employee) session.getAttribute("currUser");
-        List<Expense> expenses = expenseService.findExpenseByEmpId(currUser.getEmpId());
-        if (expenses == null) {
-            req.setAttribute("error", "出错了");
-        } else {
-            req.setAttribute("expenses", expenses);
-        }
+
+        expenseService.findExpenseByEmpId(currUser.getEmpId(), pageBean);
+
+        req.setAttribute("pageBean", pageBean);
         req.getRequestDispatcher("/expense/myExpense.jsp").forward(req, resp);
     }
 

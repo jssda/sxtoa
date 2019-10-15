@@ -2,8 +2,10 @@ package pers.jssd.servlet;
 
 import pers.jssd.entity.Auditing;
 import pers.jssd.entity.Employee;
+import pers.jssd.entity.Expense;
 import pers.jssd.service.AuditService;
 import pers.jssd.service.impl.AuditServiceImpl;
+import pers.jssd.util.PageBean;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -20,7 +22,13 @@ public class AuditServlet extends BaseServlet {
 
     private AuditService auditService = new AuditServiceImpl();
 
-    // 查看报销单审核历史
+    /**
+     * 查看报销单审核历史
+     *
+     * @param req  请求
+     * @param resp 响应
+     * @throws IOException IO异常
+     */
     public void toAuditHistory(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             int expId = Integer.parseInt(req.getParameter("expId"));
@@ -35,19 +43,38 @@ public class AuditServlet extends BaseServlet {
         }
     }
 
-    // 查看本人的所有审核信息
+    /**
+     * 查看本人的所有审核信息
+     *
+     * @param req  请求
+     * @param resp 响应
+     * @throws IOException IO异常
+     */
     public void toMyAudit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // 取得当前页
+        PageBean<Auditing> pageBean = new PageBean<>();
+        String sIndex = req.getParameter("index");
+        int index = 1;
+
+        try {
+            index = Integer.parseInt(sIndex);
+        } catch (NumberFormatException e) {
+            //e.printStackTrace();
+        }
+        pageBean.setIndex(index);
+
         HttpSession session = req.getSession();
         Employee currUser = (Employee) session.getAttribute("currUser");
-        List<Auditing> auditingList = auditService.findAuditingByEmpId(currUser.getEmpId());
-        req.setAttribute("auditingList", auditingList);
+        auditService.findAuditingByEmpId(currUser.getEmpId(), pageBean);
+
+        req.setAttribute("pageBean", pageBean);
         req.getRequestDispatcher("/expense/myAudit.jsp").forward(req, resp);
     }
 
     /**
      * 审核报销单
      *
-     * @param req 请求
+     * @param req  请求
      * @param resp 响应
      * @throws IOException 重定向产生的异常
      */

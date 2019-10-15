@@ -105,6 +105,65 @@ public class ExpenseDaoImpl implements ExpenseDao {
     }
 
     @Override
+    public List<Expense> listExpensesByEmpId(String empId, int startRow, int endRow) throws SQLException {
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        List<Expense> expenseList = new ArrayList<>();
+
+        try {
+            String sql = "select *\n" +
+                    "from (select ROWNUM rn, temp.*\n" +
+                    "      from (" +
+                    "select ex.*, e.REALNAME, e.MGRID mgr, E2.REALNAME auditRealName\n" +
+                    "from expense ex\n" +
+                    "         join EMPLOYEE E on ex.EMPID = E.EMPID\n" +
+                    "         left join EMPLOYEE E2 on ex.NEXTAUDITOR = E2.EMPID\n" +
+                    "where E.EMPID = ?"
+                    + ") temp\n" +
+                    "      where ROWNUM <= ?)\n" +
+                    "where rn > ?";
+
+            connection = DBUtil2.getConnection();
+            ps = connection.prepareStatement(sql);
+            ps.setString(1, empId);
+            ps.setInt(2, endRow);
+            ps.setInt(3, startRow);
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Expense expense = new Expense();
+                expense.setExpId(rs.getInt("expId"));
+                expense.setEmpId(empId);
+                expense.setTotalAmount(rs.getInt("totalAmount"));
+                expense.setExpTime(rs.getTimestamp("expTime"));
+                expense.setExpDesc(rs.getString("expDesc"));
+
+                // 添加审核人信息
+                expense.setNextAuditor(rs.getString("nextAuditor"));
+                Employee auditor = new Employee();
+                auditor.setEmpId(rs.getString("nextAuditor"));
+                auditor.setRealName(rs.getString("auditRealName"));
+                expense.setAuditor(auditor);
+
+                expense.setLastResult(rs.getString("lastResult"));
+                expense.setStatus(rs.getString("status"));
+
+                // 添加报销单发起人信息
+                Employee employee = new Employee(empId, rs.getString("realName"));
+                employee.setMgr(new Employee(rs.getString("mgr")));
+                expense.setEmployee(employee);
+
+                expenseList.add(expense);
+            }
+        } finally {
+            DBUtil2.closeAll(rs, ps, null);
+        }
+        return expenseList;
+    }
+
+    @Override
     public List<Expense> listExpensesByNextAudit(String nextAuditor) throws SQLException {
         Connection connection = null;
         PreparedStatement ps = null;
@@ -190,5 +249,32 @@ public class ExpenseDaoImpl implements ExpenseDao {
             DBUtil2.closeAll(rs, ps, null);
         }
         return expense;
+    }
+
+    @Override
+    public int getExpenseSumBy(String empId) throws SQLException {
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        int count = 0;
+
+        try {
+            String sql = "select count(*)" +
+                    "from expense ex\n" +
+                    "         join EMPLOYEE E on ex.EMPID = E.EMPID\n" +
+                    "         left join EMPLOYEE E2 on ex.NEXTAUDITOR = E2.EMPID\n" +
+                    "where E.EMPID = ?";
+            connection = DBUtil2.getConnection();
+            ps = connection.prepareStatement(sql);
+            ps.setString(1, empId);
+            rs = ps.executeQuery();
+
+            rs.next();
+            count = rs.getInt(1);
+        } finally {
+            DBUtil2.closeAll(rs, ps, null);
+        }
+
+        return count;
     }
 }

@@ -2,6 +2,7 @@ package pers.jssd.service;
 
 import pers.jssd.entity.Income;
 import pers.jssd.entity.Payment;
+import pers.jssd.util.PageBean;
 
 import java.util.Date;
 import java.util.List;
@@ -31,6 +32,16 @@ public interface InPayService {
     List<Income> findIncomeBy(Date start, Date end, String icType);
 
     /**
+     * 通过条件分页查询收入
+     *
+     * @param start  开始时间范围
+     * @param end    结束时间范围
+     * @param icType 收入类型
+     * @param pageBean 分页信息
+     */
+    void findIncomeBy(Date start, Date end, String icType, PageBean<Income> pageBean);
+
+    /**
      * 取得统计数据拼接成得字符串
      *
      * @return 返回统计数据拼接成得字符串
@@ -47,6 +58,17 @@ public interface InPayService {
      * @return 返回查询到得所有支出构成的容器
      */
     List<Payment> findPaymentBy(Date start, Date end, String payEmpId, String paymentType);
+
+    /**
+     * 通过条件分页查询支出
+     *
+     * @param start 查询范围开始时间
+     * @param end 查询范围结束时间
+     * @param payEmpId 支出人id
+     * @param  paymentType 支出类型
+     * @param pageBean  分页信息
+     */
+    void findPaymentBy(Date start, Date end, String payEmpId, String paymentType, PageBean<Payment> pageBean);
 
     /**
      * 取得支出统计数据拼接成得字符串

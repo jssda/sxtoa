@@ -30,7 +30,6 @@
             $(".select1").uedSelect({
                 width: 200
             });
-
         });
     </script>
     <script type="text/javascript">
@@ -53,7 +52,12 @@
 
         });
     </script>
-
+    <script type="text/javascript">
+        // 分页实现
+        function changePage(index) {
+            window.location = "servlet/dutyServlet?method=toMyDuty&index=" + index;
+        }
+    </script>
 </head>
 
 <body>
@@ -71,16 +75,14 @@
     <table class="tablelist">
         <thead>
         <tr>
-            <th><input name="" type="checkbox" value="" checked="checked"/></th>
             <th>出勤日期</th>
             <th>签到时间</th>
             <th>签退时间</th>
         </tr>
         </thead>
         <tbody>
-        <c:forEach items="${duties}" var="duty">
+        <c:forEach items="${pageBean.list}" var="duty">
             <tr>
-                <td><input name="" type="checkbox" value=""/></td>
                 <td>${duty.dtDate}</td>
                 <td>${duty.signInTime}</td>
                 <td>${duty.signOutTime}</td>
@@ -90,17 +92,35 @@
     </table>
 
     <div class="pagin">
-        <div class="message">共<i class="blue">1256</i>条记录，当前显示第&nbsp;<i class="blue">2&nbsp;</i>页</div>
+        <div class="message">共&nbsp;<i class="blue">${pageBean.totalCount}</i>&nbsp;条记录，
+            共&nbsp;<i class="blue">${pageBean.totalPageCount}</i>&nbsp;页, 当前显示第&nbsp;<i class="blue">${pageBean.index}&nbsp;</i>页
+        </div>
         <ul class="paginList">
-            <li class="paginItem"><a href="javascript:void(0);"><span class="pagepre"></span></a></li>
-            <li class="paginItem"><a href="javascript:void(0);">1</a></li>
-            <li class="paginItem current"><a href="javascript:void(0);">2</a></li>
-            <li class="paginItem"><a href="javascript:void(0);">3</a></li>
-            <li class="paginItem"><a href="javascript:void(0);">4</a></li>
-            <li class="paginItem"><a href="javascript:void(0);">5</a></li>
-            <li class="paginItem more"><a href="javascript:void(0);">...</a></li>
-            <li class="paginItem"><a href="javascript:void(0);">10</a></li>
-            <li class="paginItem"><a href="javascript:void(0);"><span class="pagenxt"></span></a></li>
+            <c:if test="${pageBean.index == 1}">
+                <li class="paginItem current"><a href="javascript:void(0);"><span class="pagepre"></span></a></li>
+            </c:if>
+            <c:if test="${pageBean.index != 1}">
+                <li class="paginItem"><a href="javascript:changePage(${pageBean.index - 1});"><span
+                        class="pagepre"></span></a></li>
+            </c:if>
+
+            <c:forEach items="${pageBean.numbers}" var="num">
+
+                <c:if test="${pageBean.index == num}">
+                    <li class="paginItem current"><a href="javascript:changePage(${num});">${num}</a></li>
+                </c:if>
+                <c:if test="${pageBean.index != num}">
+                    <li class="paginItem"><a href="javascript:changePage(${num});">${num}</a></li>
+                </c:if>
+            </c:forEach>
+
+            <c:if test="${pageBean.index == pageBean.totalPageCount}">
+                <li class="paginItem current"><a href="javascript:void(0);"><span class="pagenxt"></span></a></li>
+            </c:if>
+            <c:if test="${pageBean.index != pageBean.totalPageCount}">
+                <li class="paginItem"><a href="javascript:changePage(${pageBean.index + 1});"><span
+                        class="pagenxt"></span></a></li>
+            </c:if>
         </ul>
     </div>
 

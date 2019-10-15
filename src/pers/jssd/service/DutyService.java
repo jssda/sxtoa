@@ -1,6 +1,8 @@
 package pers.jssd.service;
 
+import pers.jssd.entity.Dept;
 import pers.jssd.entity.Duty;
+import pers.jssd.util.PageBean;
 
 import java.util.List;
 
@@ -44,4 +46,22 @@ public interface DutyService {
      * @return 返回查询到的所有用户考勤信息
      */
     List<Duty> findDuties(String empId);
+
+    /**
+     * 根据条件查询考勤, 分页显示
+     *
+     * @param empId 查询的员工id
+     * @param deptNo 查询的部门编号
+     * @param sDtDate 查询的指定时间之后
+     * @param pageBean 封装了分页信息的实体类
+     */
+    void findDuties(String empId, int deptNo, String sDtDate, PageBean<Duty> pageBean);
+
+    /**
+     * 根据用户id查询此用户分页的考勤信息
+     *
+     * @param empId 需要查询的用户id
+     * @param pageBean 分页信息
+     */
+    void findDuties(String empId, PageBean<Duty> pageBean);
 }

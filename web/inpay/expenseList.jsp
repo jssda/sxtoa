@@ -68,24 +68,27 @@
             requestTo();
 
             // 绑定查询触发ajax请求函数
-            $("input[name=search]").click(requestTo);
+            $("input[name=search]").click(function () {
+                requestTo();
+            });
         })
 
         /**
          * 向服务器发送请求
          */
-        function requestTo() {
+        function requestTo(index) {
             var startTime = $("input[name=startTime]").val();
             var endTime = $("input[name=endTime]").val();
             var payEmpId = $("input[name=payEmpId]").val();
             var paymentType = $("select[name=paymentType]").val();
 
             $.ajax({
-                url: "servlet/InPayServlet?method=findPaymentBy",
+                url: "servlet/InPayServlet?method=findPaymentBy&index=" + index,
                 data: {startTime: startTime, endTime: endTime, payEmpId: payEmpId, paymentType: paymentType},
-                success: function (data) {
-                    var arr = JSON.parse(data);
+                success: function (jsonStr) {
+                    var data = JSON.parse(jsonStr);
                     var str = "";
+                    var arr = data.list;
                     for (var i = 0; i < arr.length; i++) {
                         str += '<tr>\n';
                         if (arr[i].expense.expenseItems[0].type == 1) {
@@ -96,16 +99,37 @@
                             str += '            <td>报名费</td>\n';
                         } else if (arr[i].expense.expenseItems[0].type == 4) {
                             str += '            <td>学费</td>\n';
+                        } else if (arr[i].expense.expenseItems[0].type == 5) {
+                            str += '            <td>其他</td>\n';
                         }
-                        str += '            <td>'+arr[i].expense.expenseItems[0].amount+'</td>\n' +
-                            '            <td>'+arr[i].expense.expenseItems[0].itemDesc+'</td>\n' +
-                            '            <td>'+arr[i].payEmp.realName+'</td>\n' +
-                            '            <td>'+arr[i].payTime+'</td>\n' +
-                            '            <td><a href="#" class="tablelink">查看</a></td>\n' +
+                        str += '            <td>' + arr[i].expense.expenseItems[0].amount + '</td>\n' +
+                            '            <td>' + arr[i].expense.expenseItems[0].itemDesc + '</td>\n' +
+                            '            <td>' + arr[i].payEmp.realName + '</td>\n' +
+                            '            <td>' + arr[i].payTime + '</td>\n' +
                             '        </tr>';
                     }
 
                     $("tbody").html(str);
+
+
+                    // 动态加载页码
+                    var pageIndexStr = '<div class="message">共&nbsp;<i class="blue">' + data.totalCount + '</i>&nbsp;条记录，' +
+                        '共&nbsp;<i class="blue">' + data.totalPageCount + '</i>&nbsp;页, 当前显示第&nbsp;<i class="blue">' + data.index + '&nbsp;</i>页' +
+                        '</div>' +
+                        '<ul class="paginList">\n' +
+                        '\t<li class="paginItem"><a href="javascript:requestTo(' + (data.index - 1 <= 1 ? 1 : data.index - 1) + ');"><span class="pagepre"></span></a></li>\n';
+
+                    for (i = 0; i < data.numbers.length; i++) {
+                        if (data.numbers[i] != data.index) {
+                            pageIndexStr += '\t<li class="paginItem"><a href="javascript:requestTo(' + data.numbers[i] + ');">' + data.numbers[i] + '</a></li>\n';
+                        } else {
+                            pageIndexStr += '\t<li class="paginItem current"><a href="javascript:requestTo(' + data.numbers[i] + ');">' + data.numbers[i] + '</a></li>\n';
+                        }
+                    }
+                    pageIndexStr += '\t<li class="paginItem"><a href="javascript:requestTo(' + (data.index + 1 >= data.totalPageCount ? data.totalPageCount : data.index + 1) + ');"><span class="pagenxt"></span></a></li>\n' +
+                        '</ul>\n';
+
+                    $(".pagin").html(pageIndexStr);
                 }
             })
         }
@@ -161,11 +185,11 @@
             <th>备注</th>
             <th>支出人</th>
             <th>支出时间</th>
-            <th>操作</th>
         </tr>
         </thead>
 
         <tbody>
+        <%--    支出内容列表    --%>
         </tbody>
     </table>
 
