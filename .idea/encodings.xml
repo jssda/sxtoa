@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" defaultCharsetForPropertiesFiles="UTF-8">
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e218efa4-a694-4d69-afe4-3fe435b3b1a2/console.sql" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/pers/jssd/dao/DeptDao.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/pers/jssd/dao/impl/DeptDaoImpl.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/test/pers/jssd/test/DBTest.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/test/pers/jssd/test/DeptTest.java" charset="UTF-8" />
+    <file url="PROJECT" charset="UTF-8" />
+  </component>
+</project>

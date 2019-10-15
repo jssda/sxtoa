@@ -1,0 +1,4 @@
+select * from user_tables t, user_tab_comments c
+where t.table_name=c.table_name
+and t.table_name='EXPENSE'
+/
