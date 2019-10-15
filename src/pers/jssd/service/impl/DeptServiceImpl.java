@@ -4,7 +4,11 @@ import pers.jssd.dao.DeptDao;
 import pers.jssd.dao.impl.DeptDaoImpl;
 import pers.jssd.entity.Dept;
 import pers.jssd.service.DeptService;
+import pers.jssd.util.DBUtil2;
+import pers.jssd.util.PageBean;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -37,5 +41,20 @@ public class DeptServiceImpl implements DeptService {
     @Override
     public int updateDept(Dept dept) {
         return deptDao.updateDept(dept);
+    }
+
+    @Override
+    public void findDepts(PageBean<Dept> pageBean) {
+
+        // 设置每页显示的数据量
+        pageBean.setSize(13);
+        // 设置默认的显示页码数组长度
+        pageBean.setDefaultNumberLength(5);
+
+        int sum = deptDao.getDeptSum();
+        // 设置总页数, 设置总页数的同时, 会自动计算出一共有多少页,
+        pageBean.setTotalCount(sum);
+
+        deptDao.listDepts(pageBean);
     }
 }

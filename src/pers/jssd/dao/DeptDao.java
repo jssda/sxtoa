@@ -1,6 +1,7 @@
 package pers.jssd.dao;
 
 import pers.jssd.entity.Dept;
+import pers.jssd.util.PageBean;
 
 import java.util.List;
 
@@ -47,4 +48,17 @@ public interface DeptDao {
      * @return 返回修改的条数
      */
     int updateDept(Dept dept);
+
+    /**
+     * 取得部门一共有多少条记录
+     *
+     * @return 返回部门总的记录数
+     */
+    int getDeptSum();
+
+    /**
+     * 查询所有的分页数据, 并存储再pageBean中
+     * @param pageBean 分页的所有信息
+     */
+    void listDepts(PageBean<Dept> pageBean);
 }

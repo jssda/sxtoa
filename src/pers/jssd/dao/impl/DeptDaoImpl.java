@@ -3,6 +3,8 @@ package pers.jssd.dao.impl;
 import pers.jssd.dao.DeptDao;
 import pers.jssd.entity.Dept;
 import pers.jssd.util.DBUtil;
+import pers.jssd.util.DBUtil2;
+import pers.jssd.util.PageBean;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -101,5 +103,66 @@ public class DeptDaoImpl implements DeptDao {
         String sql = "update DEPT set deptname=?, location=? where DEPTNO = ?";
 
         return DBUtil.executeUpdate(sql, objs);
+    }
+
+    @Override
+    public int getDeptSum() {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        int sum = 0;
+
+        try {
+            conn = DBUtil2.getConnection();
+            String sql = "select count(*) from dept";
+            ps = conn.prepareStatement(sql);
+            rs = ps.executeQuery();
+            rs.next();
+            sum = rs.getInt(1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil2.closeAll(rs, ps, conn);
+        }
+        return sum;
+    }
+
+    @Override
+    public void listDepts(PageBean<Dept> pageBean) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        List<Dept> list = new ArrayList<>();
+
+        try {
+            String sql = "select *\n" +
+                    "from (select d.*, ROWNUM rn from (select * from dept order by DEPTNO) d where ROWNUM <= ?)\n" +
+                    "where rn > ?";
+            connection = DBUtil.getConnection();
+            statement = connection.prepareStatement(sql);
+
+            int startRow = pageBean.getStartRow();
+            int endRow = pageBean.getEndRow();
+
+            statement.setInt(1, endRow);
+            statement.setInt(2, startRow);
+
+            rs = statement.executeQuery();
+
+            while (rs.next()) {
+                Dept dept = new Dept();
+                dept.setDeptNo(rs.getInt(1));
+                dept.setDeptName(rs.getString(2));
+                dept.setLocation(rs.getString(3));
+
+                list.add(dept);
+            }
+
+            pageBean.setList(list);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.closeAll(rs, statement, connection);
+        }
     }
 }

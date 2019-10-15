@@ -1,6 +1,7 @@
 package pers.jssd.service;
 
 import pers.jssd.entity.Dept;
+import pers.jssd.util.PageBean;
 
 import java.util.List;
 
@@ -46,4 +47,11 @@ public interface DeptService {
      * @return 返回修改的条数
      */
     int updateDept(Dept dept);
+
+    /**
+     * 使用分页查询所有的部门数据, pageBean中存储的是分页的信息
+     *
+     * @param pageBean 所有的分页信息
+     */
+    void findDepts(PageBean<Dept> pageBean);
 }

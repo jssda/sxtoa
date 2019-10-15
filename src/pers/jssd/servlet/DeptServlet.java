@@ -3,6 +3,7 @@ package pers.jssd.servlet;
 import pers.jssd.entity.Dept;
 import pers.jssd.service.DeptService;
 import pers.jssd.service.impl.DeptServiceImpl;
+import pers.jssd.util.PageBean;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -46,9 +47,22 @@ public class DeptServlet extends BaseServlet {
      * @param resp 响应
      */
     public void findDepts(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        List<Dept> deptList = service.findDepts();
+        PageBean<Dept> pageBean = new PageBean<>();
+        String sIndex = req.getParameter("index");
+        int index = 1;
 
-        req.setAttribute("deptList", deptList);
+
+        try {
+            index = Integer.parseInt(sIndex);
+        } catch (NumberFormatException e) {
+            //e.printStackTrace();
+        }
+
+        pageBean.setIndex(index);
+
+        service.findDepts(pageBean);
+
+        req.setAttribute("pageBean", pageBean);
         req.getRequestDispatcher("/system/deptList.jsp").forward(req, resp);
     }
 
