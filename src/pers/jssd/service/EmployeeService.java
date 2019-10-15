@@ -1,6 +1,8 @@
 package pers.jssd.service;
 
+import pers.jssd.entity.Dept;
 import pers.jssd.entity.Employee;
+import pers.jssd.util.PageBean;
 
 import java.util.List;
 
@@ -66,4 +68,12 @@ public interface EmployeeService {
      * @return 数据库中有这个员工则返回此员工对象
      */
     Employee login(String userName, String password);
+
+    /**
+     * 按照条件查询, 并分页
+     *
+     * @param pageBean 分页信息
+     * @param mgr 查询数据的条件
+     */
+    void findEmployeesBy(PageBean<Employee> pageBean, Employee mgr);
 }

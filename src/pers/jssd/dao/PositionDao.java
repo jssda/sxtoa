@@ -58,7 +58,9 @@ public interface PositionDao {
 
     /**
      * 查找所有职位信息, 封装到分页工具类中
-     * @param pageBean 分页工具类
+     *
+     * @param startRow 分页开始的记录位置
+     * @param endRow   分页结束的记录位置
      */
-    void listPositions(PageBean<Position> pageBean);
+    List<Position> listPositions(int startRow, int endRow);
 }

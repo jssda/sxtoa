@@ -19,6 +19,7 @@ public interface EmployeeDao {
 
     /**
      * 从数据库中查找所有的Employee雇员信息
+     *
      * @return 返回一个存储作用的雇员信息的list
      */
     List<Employee> listEmployees();
@@ -50,9 +51,27 @@ public interface EmployeeDao {
     /**
      * 在数据库中更新用户的密码
      *
-     * @param empId 需要更新的用户id
+     * @param empId  需要更新的用户id
      * @param newPwd 需要更新的新密码
      * @return 返回更新后的条数
      */
     int updatePwd(String empId, String newPwd);
+
+    /**
+     * 从数据库中按照条件查找
+     *
+     * @param mgr      查找的条件封装的employee对象
+     * @param startRow 分页查找的开始记录位置
+     * @param endRow   分页查找的结束记录位置
+     * @return 返回所有找到的employee对象
+     */
+    List<Employee> listEmployeesBy(Employee mgr, int startRow, int endRow);
+
+    /**
+     * 查看一定条件下的用户有多少条记录
+     *
+     * @param mgr 封装查询条件的employee对象
+     * @return 返回查询到了多少条记录
+     */
+    int getSumBy(Employee mgr);
 }

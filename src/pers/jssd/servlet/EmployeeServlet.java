@@ -9,6 +9,7 @@ import pers.jssd.service.PositionService;
 import pers.jssd.service.impl.DeptServiceImpl;
 import pers.jssd.service.impl.EmployeeServiceImpl;
 import pers.jssd.service.impl.PositionServiceImpl;
+import pers.jssd.util.PageBean;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -114,6 +115,18 @@ public class EmployeeServlet extends BaseServlet {
     // 根据条件查询员工
     public void findEmployeesBy(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
+        // 查看分页当前页
+        PageBean<Employee> pageBean = new PageBean<>();
+        String sIndex = req.getParameter("index");
+        int index = 1;
+        try {
+            index = Integer.parseInt(sIndex);
+        } catch (NumberFormatException e) {
+            //e.printStackTrace();
+        }
+        pageBean.setIndex(index);
+
+        // 记录查询条件的一些数据, 提供查询到数据之后的条件回显
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         Employee mgr = new Employee();
@@ -146,12 +159,13 @@ public class EmployeeServlet extends BaseServlet {
             e.printStackTrace();
         }
 
-        List<Employee> employees = employeeService.findEmployeesBy(mgr);
+        // 查询数据
+        employeeService.findEmployeesBy(pageBean, mgr);
 
         List<Dept> depts = deptService.findDepts();
         req.setAttribute("depts", depts);
 
-        req.setAttribute("employees", employees);
+        req.setAttribute("pageBean", pageBean);
 
         req.getRequestDispatcher("/system/empList.jsp").forward(req, resp);
     }

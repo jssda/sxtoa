@@ -51,6 +51,10 @@ public class PositionServiceImpl implements PositionService {
         // 设置总页数, 设置总页数的同时, 会自动计算出一共有多少页,
         pageBean.setTotalCount(sum);
 
-        positionDao.listPositions(pageBean);
+        int startRow = pageBean.getStartRow();
+        int endRow = pageBean.getEndRow();
+
+        List<Position> list = positionDao.listPositions(startRow, endRow);
+        pageBean.setList(list);
     }
 }

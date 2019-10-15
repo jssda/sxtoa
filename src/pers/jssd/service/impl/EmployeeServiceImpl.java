@@ -2,8 +2,10 @@ package pers.jssd.service.impl;
 
 import pers.jssd.dao.EmployeeDao;
 import pers.jssd.dao.impl.EmployeeDaoImpl;
+import pers.jssd.entity.Dept;
 import pers.jssd.entity.Employee;
 import pers.jssd.service.EmployeeService;
+import pers.jssd.util.PageBean;
 
 import java.util.List;
 
@@ -61,6 +63,26 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         return null;
+    }
+
+    @Override
+    public void findEmployeesBy(PageBean<Employee> pageBean, Employee mgr) {
+        // 设置每页显示的数据量
+        pageBean.setSize(4);
+        // 设置默认的显示页码数组长度
+        pageBean.setDefaultNumberLength(5);
+
+        // 查询再指定条件下的数组总数
+        int sum = employeeDao.getSumBy(mgr);
+
+        // 设置总页数, 设置总页数的同时, 会自动计算出一共有多少页,
+        pageBean.setTotalCount(sum);
+
+        int startRow = pageBean.getStartRow();
+        int endRow = pageBean.getEndRow();
+
+        List<Employee> list = employeeDao.listEmployeesBy(mgr, startRow, endRow);
+        pageBean.setList(list);
     }
 
 }

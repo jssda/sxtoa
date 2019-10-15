@@ -128,7 +128,7 @@ public class DeptDaoImpl implements DeptDao {
     }
 
     @Override
-    public void listDepts(PageBean<Dept> pageBean) {
+    public List<Dept> listDepts(int startRow, int endRow) {
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet rs = null;
@@ -140,9 +140,6 @@ public class DeptDaoImpl implements DeptDao {
                     "where rn > ?";
             connection = DBUtil.getConnection();
             statement = connection.prepareStatement(sql);
-
-            int startRow = pageBean.getStartRow();
-            int endRow = pageBean.getEndRow();
 
             statement.setInt(1, endRow);
             statement.setInt(2, startRow);
@@ -157,12 +154,11 @@ public class DeptDaoImpl implements DeptDao {
 
                 list.add(dept);
             }
-
-            pageBean.setList(list);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             DBUtil.closeAll(rs, statement, connection);
         }
+        return list;
     }
 }

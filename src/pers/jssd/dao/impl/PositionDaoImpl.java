@@ -1,11 +1,9 @@
 package pers.jssd.dao.impl;
 
 import pers.jssd.dao.PositionDao;
-import pers.jssd.entity.Dept;
 import pers.jssd.entity.Position;
 import pers.jssd.util.DBUtil;
 import pers.jssd.util.DBUtil2;
-import pers.jssd.util.PageBean;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -122,7 +120,7 @@ public class PositionDaoImpl implements PositionDao {
     }
 
     @Override
-    public void listPositions(PageBean<Position> pageBean) {
+    public List<Position> listPositions(int startRow, int endRow) {
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet rs = null;
@@ -136,9 +134,6 @@ public class PositionDaoImpl implements PositionDao {
             connection = DBUtil.getConnection();
             statement = connection.prepareStatement(sql);
 
-            int startRow = pageBean.getStartRow();
-            int endRow = pageBean.getEndRow();
-
             statement.setInt(1, endRow);
             statement.setInt(2, startRow);
 
@@ -147,12 +142,11 @@ public class PositionDaoImpl implements PositionDao {
                 Position position = new Position(rs.getInt(1), rs.getString(2), rs.getString(3));
                 positions.add(position);
             }
-            
-            pageBean.setList(positions);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             DBUtil.closeAll(rs, statement, connection);
         }
+        return positions;
     }
 }

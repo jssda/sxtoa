@@ -44,6 +44,7 @@ public interface DeptDao {
 
     /**
      * 根据id从数据库中修改一个dept
+     *
      * @param dept 需要修改的dept
      * @return 返回修改的条数
      */
@@ -58,7 +59,9 @@ public interface DeptDao {
 
     /**
      * 查询所有的分页数据, 并存储再pageBean中
-     * @param pageBean 分页的所有信息
+     *
+     * @param starRow 开始的数据位置
+     * @param endRow  结束的数据位置
      */
-    void listDepts(PageBean<Dept> pageBean);
+    List<Dept> listDepts(int starRow, int endRow);
 }

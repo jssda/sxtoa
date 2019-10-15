@@ -57,7 +57,12 @@
 
         });
     </script>
-
+    <script type="text/javascript">
+        // 分页实现
+        function changePage(index) {
+            window.location = "servlet/employeeServlet?method=findEmployeesBy&index=" + index;
+        }
+    </script>
 </head>
 
 <body>
@@ -142,7 +147,7 @@
         </thead>
         <tbody>
 
-        <c:forEach items="${employees}" var="employee">
+        <c:forEach items="${pageBean.list}" var="employee">
             <tr>
                 <td>${employee.empId}</td>
                 <td>${employee.realName}</td>
@@ -170,19 +175,38 @@
     </table>
 
     <div class="pagin">
-        <div class="message">共<i class="blue">1256</i>条记录，当前显示第&nbsp;<i class="blue">2&nbsp;</i>页</div>
+        <div class="message">共&nbsp;<i class="blue">${pageBean.totalCount}</i>&nbsp;条记录，
+            共&nbsp;<i class="blue">${pageBean.totalPageCount}</i>&nbsp;页, 当前显示第&nbsp;<i class="blue">${pageBean.index}&nbsp;</i>页
+        </div>
         <ul class="paginList">
-            <li class="paginItem"><a href="javascript:;"><span class="pagepre"></span></a></li>
-            <li class="paginItem"><a href="javascript:;">1</a></li>
-            <li class="paginItem current"><a href="javascript:;">2</a></li>
-            <li class="paginItem"><a href="javascript:;">3</a></li>
-            <li class="paginItem"><a href="javascript:;">4</a></li>
-            <li class="paginItem"><a href="javascript:;">5</a></li>
-            <li class="paginItem more"><a href="javascript:;">...</a></li>
-            <li class="paginItem"><a href="javascript:;">10</a></li>
-            <li class="paginItem"><a href="javascript:;"><span class="pagenxt"></span></a></li>
+            <c:if test="${pageBean.index == 1}">
+                <li class="paginItem current"><a href="javascript:void(0);"><span class="pagepre"></span></a></li>
+            </c:if>
+            <c:if test="${pageBean.index != 1}">
+                <li class="paginItem"><a href="javascript:changePage(${pageBean.index - 1});"><span
+                        class="pagepre"></span></a></li>
+            </c:if>
+
+            <c:forEach items="${pageBean.numbers}" var="num">
+
+                <c:if test="${pageBean.index == num}">
+                    <li class="paginItem current"><a href="javascript:changePage(${num});">${num}</a></li>
+                </c:if>
+                <c:if test="${pageBean.index != num}">
+                    <li class="paginItem"><a href="javascript:changePage(${num});">${num}</a></li>
+                </c:if>
+            </c:forEach>
+
+            <c:if test="${pageBean.index == pageBean.totalPageCount}">
+                <li class="paginItem current"><a href="javascript:void(0);"><span class="pagenxt"></span></a></li>
+            </c:if>
+            <c:if test="${pageBean.index != pageBean.totalPageCount}">
+                <li class="paginItem"><a href="javascript:changePage(${pageBean.index + 1});"><span
+                        class="pagenxt"></span></a></li>
+            </c:if>
         </ul>
     </div>
+
     <c:if test="${error == true}">
         <span style="font-size: 18px; font-weight: bold; color: red">发生了错误</span>
     </c:if>

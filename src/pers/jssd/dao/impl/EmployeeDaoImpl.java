@@ -5,6 +5,7 @@ import pers.jssd.entity.Dept;
 import pers.jssd.entity.Employee;
 import pers.jssd.entity.Position;
 import pers.jssd.util.DBUtil;
+import pers.jssd.util.DBUtil2;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -359,5 +360,268 @@ public class EmployeeDaoImpl implements EmployeeDao {
         Object[] params = new Object[]{newPwd, empId};
 
         return DBUtil.executeUpdate(sql, params);
+    }
+
+    @Override
+    public List<Employee> listEmployeesBy(Employee employee, int startRow, int endRow) {
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        List<Employee> employees = new ArrayList<>();
+
+        try {
+            StringBuilder sql = new StringBuilder("select *\n" +
+                    "from (select ROWNUM rn, temp.*\n" +
+                    "      from (select e.*, d.deptName, p.pName, m.realName mgrName\n" +
+                    "            from employee e\n" +
+                    "                     join dept d\n" +
+                    "                          on e.deptno = d.deptno\n" +
+                    "                     join position p\n" +
+                    "                          on e.posId = p.posId\n" +
+                    "                     left join employee m\n" +
+                    "                               on e.mgrId = m.empId\n" +
+                    "            where 1 = 1 ");
+
+            // 添加用户id条件
+            String empId = employee.getEmpId();
+            if (empId != null && !"".equals(empId.trim())) {
+                sql.append(" and e.empId = '").append(empId).append("'");
+            }
+
+            // 添加用户密码条件
+            String password = employee.getPassword();
+            if (password != null && !"".equals(password.trim())) {
+                sql.append(" and e.password='").append(password).append("'");
+            }
+
+            // 添加部门号条件
+            Dept dept = employee.getDept();
+            int deptNo = -1;
+            if (dept != null) {
+                deptNo = dept.getDeptNo();
+            }
+            if (deptNo != -1) {
+                sql.append(" and e.deptNo = '").append(deptNo).append("'");
+            }
+
+            // 添加职位条件
+            Position position = employee.getPosition();
+            int posId = -1;
+            if (position != null) {
+                posId = position.getPosId();
+            }
+            if (posId != -1) {
+                sql.append(" and e.posId = '").append(posId).append("'");
+            }
+
+            // 添加上级条件
+            Employee mgr = employee.getMgr();
+            String mgrId = null;
+            if (mgr != null) {
+                mgrId = mgr.getEmpId();
+            }
+            if (mgrId != null && !"".equals(mgrId.trim())) {
+                sql.append(" and e.mgrId=").append(mgrId);
+            }
+
+            String realName = employee.getRealName();
+            if (realName != null && !"".equals(realName.trim())) {
+                sql.append(" and e.realName like '%").append(realName).append("%'");
+            }
+
+            String sex = employee.getSex();
+            if (sex != null && !"".equals(sex.trim())) {
+                sql.append(" and e.sex='").append(sex).append("'");
+            }
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+            // 指定日期之后
+            java.util.Date birthDate = employee.getBirthDate();
+            if (birthDate != null) {
+                String format = dateFormat.format(birthDate);
+                sql.append(" and to_char(e.birthDate, 'yyyy-mm-dd') >= '").append(format).append("'");
+            }
+
+            java.util.Date hireDate = employee.getHireDate();
+            if (hireDate != null) {
+                String format = dateFormat.format(hireDate);
+                sql.append(" and to_char(e.hireDate, 'yyyy-mm-dd') >= '").append(format).append("'");
+            }
+
+            int onDuty = employee.getOnDuty();
+            if (onDuty != 3) {
+                sql.append(" and e.onDuty = ").append(onDuty);
+            }
+
+            int empType = employee.getEmpType();
+            if (empType != 0) {
+                sql.append(" and e.empType = ").append(empType);
+            }
+
+            // 添加分页条件
+            sql.append(" order by e.EMPID) temp\n" +
+                    "      where ROWNUM <= ?)\n" +
+                    "where rn > ?");
+
+            //System.out.println("sql = " + sql);
+
+            connection = DBUtil.getConnection();
+            statement = connection.prepareStatement(sql.toString());
+            statement.setInt(1, endRow);
+            statement.setInt(2, startRow);
+
+            rs = statement.executeQuery();
+
+            while (rs.next()) {
+                Employee temp = new Employee();
+
+                temp.setEmpId(rs.getString("empId"));
+                temp.setPassword(rs.getString("password"));
+
+                // 添加部门
+                Dept d = new Dept(rs.getInt("deptNo"), rs.getString("deptName"), null);
+                temp.setDept(d);
+
+                // 添加职位
+                Position pos = new Position(rs.getInt("posId"), rs.getString("pName"), null);
+                temp.setPosition(pos);
+
+                // 添加领导
+                Employee m = new Employee(rs.getString("mgrId"), rs.getString("mgrName"));
+                temp.setMgr(m);
+
+                temp.setRealName(rs.getString("realName"));
+                temp.setSex(rs.getString("sex"));
+                temp.setBirthDate(rs.getDate("birthDate"));
+                temp.setHireDate(rs.getDate("hireDate"));
+                temp.setLeaveDate(rs.getDate("leaveDate"));
+                temp.setOnDuty(rs.getInt("onDuty"));
+                temp.setEmpType(rs.getInt("empType"));
+                temp.setPhone(rs.getString("phone"));
+                temp.setQq(rs.getString("QQ"));
+                temp.setEmerContactPerson(rs.getString("emerContactPerson"));
+                temp.setIdCard(rs.getString("idCard"));
+
+                employees.add(temp);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.closeAll(rs, statement, connection);
+        }
+
+        return employees;
+    }
+
+    @Override
+    public int getSumBy(Employee employee) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        int sum = 0;
+
+        try {
+            conn = DBUtil2.getConnection();
+            StringBuilder sql = new StringBuilder("select count(*)\n" +
+                    "            from employee e\n" +
+                    "                     join dept d\n" +
+                    "                          on e.deptno = d.deptno\n" +
+                    "                     join position p\n" +
+                    "                          on e.posId = p.posId\n" +
+                    "                     left join employee m\n" +
+                    "                               on e.mgrId = m.empId\n" +
+                    "            where 1 = 1 ");
+
+            // 添加用户id条件
+            String empId = employee.getEmpId();
+            if (empId != null && !"".equals(empId.trim())) {
+                sql.append(" and e.empId = '").append(empId).append("'");
+            }
+
+            // 添加用户密码条件
+            String password = employee.getPassword();
+            if (password != null && !"".equals(password.trim())) {
+                sql.append(" and e.password='").append(password).append("'");
+            }
+
+            // 添加部门号条件
+            Dept dept = employee.getDept();
+            int deptNo = -1;
+            if (dept != null) {
+                deptNo = dept.getDeptNo();
+            }
+            if (deptNo != -1) {
+                sql.append(" and e.deptNo = '").append(deptNo).append("'");
+            }
+
+            // 添加职位条件
+            Position position = employee.getPosition();
+            int posId = -1;
+            if (position != null) {
+                posId = position.getPosId();
+            }
+            if (posId != -1) {
+                sql.append(" and e.posId = '").append(posId).append("'");
+            }
+
+            // 添加上级条件
+            Employee mgr = employee.getMgr();
+            String mgrId = null;
+            if (mgr != null) {
+                mgrId = mgr.getEmpId();
+            }
+            if (mgrId != null && !"".equals(mgrId.trim())) {
+                sql.append(" and e.mgrId=").append(mgrId);
+            }
+
+            String realName = employee.getRealName();
+            if (realName != null && !"".equals(realName.trim())) {
+                sql.append(" and e.realName like '%").append(realName).append("%'");
+            }
+
+            String sex = employee.getSex();
+            if (sex != null && !"".equals(sex.trim())) {
+                sql.append(" and e.sex='").append(sex).append("'");
+            }
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+            // 指定日期之后
+            java.util.Date birthDate = employee.getBirthDate();
+            if (birthDate != null) {
+                String format = dateFormat.format(birthDate);
+                sql.append(" and to_char(e.birthDate, 'yyyy-mm-dd') >= '").append(format).append("'");
+            }
+
+            java.util.Date hireDate = employee.getHireDate();
+            if (hireDate != null) {
+                String format = dateFormat.format(hireDate);
+                sql.append(" and to_char(e.hireDate, 'yyyy-mm-dd') >= '").append(format).append("'");
+            }
+
+            int onDuty = employee.getOnDuty();
+            if (onDuty != 3) {
+                sql.append(" and e.onDuty = ").append(onDuty);
+            }
+
+            int empType = employee.getEmpType();
+            if (empType != 0) {
+                sql.append(" and e.empType = ").append(empType);
+            }
+
+            // 添加完条件, 查询出一共有多少条记录
+            ps = conn.prepareStatement(sql.toString());
+            rs = ps.executeQuery();
+            rs.next();
+            sum = rs.getInt(1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil2.closeAll(rs, ps, conn);
+        }
+        return sum;
     }
 }

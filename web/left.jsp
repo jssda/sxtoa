@@ -72,7 +72,7 @@
                 </li>
                 <li><cite></cite><a href="servlet/employeeServlet?method=showAddEmployee"
                                     target="rightFrame">添加员工</a><i></i></li>
-                <li><cite></cite><a href="servlet/employeeServlet?method=findEmployees"
+                <li><cite></cite><a href="servlet/employeeServlet?method=findEmployeesBy"
                                     target="rightFrame">员工管理</a><i></i>
                 </li>
             </ul>
