@@ -86,6 +86,14 @@ public class PositionServlet extends BaseServlet {
         }
     }
 
+    /**
+     * 更新职位信息
+     *
+     * @param req  请求
+     * @param resp 响应
+     * @throws ServletException Servlet异常
+     * @throws IOException      IO异常
+     */
     public void updatePosition(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // 获取客户端传递的参数
         String posId = req.getParameter("posId");

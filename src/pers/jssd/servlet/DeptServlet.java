@@ -66,6 +66,13 @@ public class DeptServlet extends BaseServlet {
         req.getRequestDispatcher("/system/deptList.jsp").forward(req, resp);
     }
 
+    /**
+     * 通过id查询部门
+     * @param req 请求
+     * @param resp 响应
+     * @throws ServletException Servlet异常
+     * @throws IOException IO异常
+     */
     public void findDeptById(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String deptNo = req.getParameter("deptNo");
 

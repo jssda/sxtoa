@@ -56,19 +56,19 @@
         <h2>添加报销</h2></a></li>
     <li><a href="duty/dutyAdd.jsp" target="rightFrame"><img src="images/icon05.png" title="签到签退"/>
         <h2>签到签退</h2></a></li>
-    <li><a href="myInfo.html" target="rightFrame"><img src="images/icon06.png" title="我的信息"/>
+    <li><a href="myInfo.jsp" target="rightFrame"><img src="images/icon06.png" title="我的信息"/>
         <h2>我的信息</h2></a></li>
 </ul>
 
 <div class="topright">
     <ul>
-        <li><span><img src="images/help.png" title="帮助" class="helpimg"/></span><a href="tech.html" target="rightFrame">帮助</a>
+        <li><span><img src="images/help.png" title="帮助" class="helpimg"/></span><a href="tech.jsp" target="rightFrame">帮助</a>
         </li>
         <li><a href="servlet/employeeServlet?method=logout" target="_parent">退出</a></li>
     </ul>
 
     <div class="user">
-        <span><a href="myInfo.html" target="rightFrame">${sessionScope.currUser.empId}</a></span>
+        <span><a href="myInfo.jsp" target="rightFrame">${sessionScope.currUser.empId}</a></span>
     </div>
 
 </div>

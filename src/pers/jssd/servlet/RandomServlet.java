@@ -14,7 +14,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
-
+/**
+ * 产生验证码的servlet
+ */
 public class RandomServlet extends HttpServlet {
 
 	

@@ -20,9 +20,9 @@
     <frame src="top.jsp" name="topFrame" scrolling="No" noresize="noresize" id="topFrame" title="topFrame"/>
     <frameset cols="187,*" frameborder="no" border="0" framespacing="0">
         <frame src="left.jsp" name="leftFrame" scrolling="No" noresize="noresize" id="leftFrame" title="leftFrame"/>
-        <frame src="index.html" name="rightFrame" id="rightFrame" title="rightFrame"/>
+        <frame src="index.jsp" name="rightFrame" id="rightFrame" title="rightFrame"/>
     </frameset>
-    <frame src="footer.html" name="bottomFrame" scrolling="No" noresize="noresize" id="bottomFrame"
+    <frame src="footer.jsp" name="bottomFrame" scrolling="No" noresize="noresize" id="bottomFrame"
            title="bottomFrame"/>
 </frameset>
 <noframes>

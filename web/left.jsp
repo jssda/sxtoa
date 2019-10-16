@@ -120,7 +120,7 @@
     <dd>
         <div class="title"><span><img src="images/leftico03.png"/></span>个人平台</div>
         <ul class="menuson">
-            <li><cite></cite><a href="myInfo.html" target="rightFrame">我的信息</a><i></i></li>
+            <li><cite></cite><a href="myInfo.jsp" target="rightFrame">我的信息</a><i></i></li>
             <li><cite></cite><a href="personal/pwdUpdate.jsp" target="rightFrame">修改密码</a><i></i></li>
         </ul>
     </dd>

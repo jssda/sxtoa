@@ -371,6 +371,13 @@ public class EmployeeServlet extends BaseServlet {
      * @param resp 响应
      */
 
+    /**
+     * 从请求中获取用户信息
+     *
+     * @param req 请求
+     * @param resp 响应
+     * @return 返回获取到的用户信息封装成一个employee对象
+     */
     private Employee getEmpFromReq(HttpServletRequest req, HttpServletResponse resp) {
         // 时间格式化
         SimpleDateFormat dataFormat = new SimpleDateFormat("yyyy-MM-dd");
