@@ -159,6 +159,7 @@ public class ExpenseServlet extends BaseServlet {
         } catch (NumberFormatException e) {
             req.setAttribute("error", e.toString());
             req.getRequestDispatcher("/error.jsp").forward(req, resp);
+            return;
         }
         List<ExpImage> expImages = expenseService.findExpImage(expId);
         req.setAttribute("expImages", expImages);

@@ -76,7 +76,7 @@
                 <td><a href="servlet/expenseServlet?method=toExpenseDetail&expId=${expense.expId}" class="tablelink">
                     查看具体报销项</a>
                 </td>
-                <td><a href="servlet/expenseServlet?method=toExpenseImg?${expense.expId}" class="tablelink">查看所附图片</a></td>
+                <td><a href="servlet/expenseServlet?method=toExpenseImg&expId=${expense.expId}" class="tablelink">查看所附图片</a></td>
                 <td>
                     <a href="javascript:void(open('expense/audit.jsp?expId=${expense.expId}','','width=500,height=230,left=300,top=300,location=0,scrollbars=0,resizable=0'))"
                        class="tablelink">审核</a>
