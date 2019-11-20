@@ -86,7 +86,7 @@
         <filter-class>pers.jssd.filter.SessionInvalidFilter</filter-class>
         <init-param>
             <param-name>ignore</param-name>
-            <param-value>login.jsp,error.jsp</param-value>
+            <param-value>login.jsp,error.jsp,png</param-value>
         </init-param>
         <init-param>
             <param-name>webResource</param-name>

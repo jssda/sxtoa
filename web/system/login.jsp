@@ -58,11 +58,11 @@
             <ul>
                 <span style="color: red; font-weight: bold; font-size: 11px; position: absolute; top: 66px; left: 286px">${error}</span>
                 <li>
-                    <input name="userName" type="text" class="loginuser" value="liukaili"
+                    <input name="userName" type="text" class="loginuser" value="user name"
                            onclick="JavaScript:this.value=''"/>
                 </li>
                 <li>
-                    <input name="password" type="password" class="loginpwd" value="123456" onclick="JavaScript:this.value=''" placeholder="密码"/>
+                    <input name="password" type="password" class="loginpwd" value="password" onclick="JavaScript:this.value=''" placeholder="密码"/>
                 </li>
                 <li class="yzm">
                     <span><input name="verifyCode" type="text" value="验证码" onclick="JavaScript:this.value=''"/></span>
